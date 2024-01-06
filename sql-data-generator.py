@@ -325,7 +325,11 @@ def generate_and_insert_faculties(num, university_ids):
 
 
 # def generate_and_insert_EducationLevel()
-
+sql_statements = [
+    "INSERT INTO EducationLevel (level_id, level_name, description, entrance_requirements) VALUES (1, 'Bachelors', 'Description for Bachelors', 'Entrance requirements for Bachelors');",
+    "INSERT INTO EducationLevel (level_id, level_name, description, entrance_requirements) VALUES (2, 'Masters', 'Description for Masters', 'Entrance requirements for Masters');",
+    "INSERT INTO EducationLevel (level_id, level_name, description, entrance_requirements) VALUES (3, 'Phd', 'Description for Phd', 'Entrance requirements for Phd');"
+]
 # def generate_and_insert_Degree()
 
 # def generate_and_insert_Program()
