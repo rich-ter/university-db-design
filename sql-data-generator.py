@@ -177,7 +177,7 @@ def create_database_and_tables():
 
 def generate_and_insert_locations(num):
     locations = []
-
+    location_ids = []
     # Generate fake data
     for i in range(1, num + 1):
         location = (
@@ -204,6 +204,10 @@ def generate_and_insert_locations(num):
         cursor.close()
 
     return location_ids
+
+
+# generate 100 locations
+generate_and_insert_locations(100)
 
 
 def generate_and_insert_students(num):
@@ -236,8 +240,13 @@ def generate_and_insert_students(num):
     finally:
         cursor.close()
 
+# need to generate universities and make sure that the location_id is matchingone entry generated from the generate and insert location function.
 
-def generate_and_insert_universities(num):
+
+generate_and_insert_students(500)
+
+
+def generate_and_insert_universities(num, location_ids):
     universities = []
 
     # Use the provided list of university names
@@ -254,15 +263,18 @@ def generate_and_insert_universities(num):
         "Hellenic Open University",
     ]
 
+    random.shuffle(location_ids)
+
     # Generate fake data
-    for i in range(1, num + 1):
+    # Generate entries for each Athens university
+    for i, university_name in enumerate(athens_universities, start=1):
         university = (
             i,                                    # university_id
-            fake.random_element(athens_universities),  # university_name
-            fake.random_int(min=1800, max=2023),        # founded_year
-            fake.url(),                             # website
-            random.choice(i),         # location_id
-            fake.random_int(min=1, max=1000),         # faculty_count
+            university_name,                      # university_name
+            fake.random_int(min=1902, max=2024),   # founded_year
+            fake.url(),                            # website
+            location_ids[i - 1],          # location_id
+            fake.random_int(min=1, max=1000),      # faculty_count
         )
         universities.append(university)
 
@@ -283,7 +295,56 @@ def generate_and_insert_universities(num):
         cursor.close()
 
 
-generate_and_insert_universities(5)
+location_ids = generate_and_insert_locations(100)
+generate_and_insert_universities(10, location_ids)
+
+
+def generate_and_insert_faculties(num, university_ids):
+    faculties = []
+
+    # Use the provided list of university names
+    random_faculties = [
+        "Faculty of Arts",
+        "Faculty of Sciences",
+        "Faculty of Engineering",
+        "Faculty of Business Administration",
+        "Faculty of Social Sciences",
+        "Faculty of Medicine",
+        "Faculty of Law",
+        "Faculty of Economics",
+        "Faculty of Information Technology",
+        "Faculty of Environmental Sciences",
+        "Faculty of Education",
+        "Faculty of Agriculture",
+        "Faculty of Fine Arts",
+        "Faculty of Psychology",
+        "Faculty of Communication",
+    ]
+
+    # CREATE TABLE IF NOT EXISTS Location
+
+
+# def generate_and_insert_EducationLevel()
+
+# def generate_and_insert_Degree()
+
+# def generate_and_insert_Program()
+
+# def generate_and_insert_Programterm()
+
+# def generate_and_insert_modules()
+
+# def generate_and_insert_student_module_results()
+
+# def generate_and_insert_student_enrollment()
+
+# def generate_and_insert_student_graduation()
+
+# def generate_and_insert_student_company()
+
+# def generate_and_insert_student_jobtitle()
+
+# def generate_and_insert_student_workexperience()
 
 
 # Close the connection
