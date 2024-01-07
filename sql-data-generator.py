@@ -50,16 +50,16 @@ def create_database_and_tables():
         
     CREATE TABLE IF NOT EXISTS EducationLevel (
         level_id INT PRIMARY KEY,
-        level_name ENUM('Bachelors', 'Masters', 'Phd'),
+        level_name ENUM('Bachelors', 'Masters', 'Phd', 'Associates', 'Post Graduate Diploma', 'Under Graduate Diploma'),
+        level ENUM('Level 6', 'Level 7', 'Level 8'),
         description VARCHAR(255),
-        entrance_requirements VARCHAR(255) NOT NULL
+        ects_requirements INT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS Degree (
         degree_id INT PRIMARY KEY,
         education_level_id INT NOT NULL,
         degree_name VARCHAR(255) NOT NULL,
-        credits_required INT NOT NULL,
         FOREIGN KEY (education_level_id) REFERENCES EducationLevel(level_id)
     );
        
@@ -298,41 +298,196 @@ def generate_and_insert_universities(num, location_ids):
 location_ids = generate_and_insert_locations(100)
 generate_and_insert_universities(10, location_ids)
 
-
+# this is not finished yet 
 def generate_and_insert_faculties(num, university_ids):
     faculties = []
 
-    # Use the provided list of university names
-    random_faculties = [
-        "Faculty of Arts",
-        "Faculty of Sciences",
-        "Faculty of Engineering",
-        "Faculty of Business Administration",
-        "Faculty of Social Sciences",
-        "Faculty of Medicine",
-        "Faculty of Law",
-        "Faculty of Economics",
-        "Faculty of Information Technology",
-        "Faculty of Environmental Sciences",
-        "Faculty of Education",
-        "Faculty of Agriculture",
-        "Faculty of Fine Arts",
-        "Faculty of Psychology",
-        "Faculty of Communication",
-    ]
+    (1, 1, 'NKUA Faculty of Arts', NULL, NULL, 1, 'Head of NKUA Faculty of Arts'),
+    (2, 1, 'NKUA Faculty of Sciences', NULL, NULL, 1, 'Head of NKUA Faculty of Sciences'),
+    (3, 1, 'NKUA Faculty of Law', NULL, NULL, 1, 'Head of NKUA Faculty of Law'),
+    (4, 1, 'NKUA Faculty of Medicine', NULL, NULL, 1, 'Head of NKUA Faculty of Medicine'),
+    (5, 1, 'NKUA Faculty of Engineering', NULL, NULL, 1, 'Head of NKUA Faculty of Engineering'),
+    (6, 1, 'NKUA Faculty of Architecture', NULL, NULL, 1, 'Head of NKUA Faculty of Architecture'),
+
+    (7, 2, 'NTUA School of Civil Engineering', NULL, NULL, 2, 'Head of NTUA School of Civil Engineering'),
+    (8, 2, 'NTUA School of Mechanical Engineering', NULL, NULL, 2, 'Head of NTUA School of Mechanical Engineering'),
+    (9, 2, 'NTUA School of Electrical and Computer Engineering', NULL, NULL, 2, 'Head of NTUA School of Electrical and Computer Engineering'),
+    (10, 2, 'NTUA School of Chemical Engineering', NULL, NULL, 2, 'Head of NTUA School of Chemical Engineering'),
+    (11, 2, 'NTUA School of Rural and Surveying Engineering', NULL, NULL, 2, 'Head of NTUA School of Rural and Surveying Engineering'),
+    (12, 2, 'NTUA School of Applied Mathematical and Physical Sciences', NULL, NULL, 2, 'Head of NTUA School of Applied Mathematical and Physical Sciences'),
+
+    (13, 3, 'AUEB Department of Business Administration', NULL, NULL, 3, 'Head of AUEB Department of Business Administration'),
+    (14, 3, 'AUEB Department of Economics', NULL, NULL, 3, 'Head of AUEB Department of Economics'),
+    (15, 3, 'AUEB Department of International and European Economic Studies', NULL, NULL, 3, 'Head of AUEB Department of International and European Economic Studies'),
+    (16, 3, 'AUEB Department of Marketing and Communication', NULL, NULL, 3, 'Head of AUEB Department of Marketing and Communication'),
+    (17, 3, 'AUEB Department of Accounting and Finance', NULL, NULL, 3, 'Head of AUEB Department of Accounting and Finance'),
+    (18, 3, 'AUEB Department of Management Science and Technology', NULL, NULL, 3, 'Head of AUEB Department of Management Science and Technology'),
+
+    (19, 4, 'UoP Department of Banking and Financial Management', NULL, NULL, 4, 'Head of UoP Department of Banking and Financial Management'),
+    (20, 4, 'UoP Department of Business Administration', NULL, NULL, 4, 'Head of UoP Department of Business Administration'),
+    (21, 4, 'UoP Department of Maritime Studies', NULL, NULL, 4, 'Head of UoP Department of Maritime Studies'),
+    (22, 4, 'UoP Department of International and European Studies', NULL, NULL, 4, 'Head of UoP Department of International and European Studies'),
+    (23, 4, 'UoP Department of Digital Systems', NULL, NULL, 4, 'Head of UoP Department of Digital Systems'),
+
+    (24, 5, 'Panteion Department of Political Science and History', NULL, NULL, 5, 'Head of Panteion Department of Political Science and History'),
+    (25, 5, 'Panteion Department of Sociology', NULL, NULL, 5, 'Head of Panteion Department of Sociology'),
+    (26, 5, 'Panteion Department of Social Policy', NULL, NULL, 5, 'Head of Panteion Department of Social Policy'),
+    (27, 5, 'Panteion Department of Communication, Media, and Culture', NULL, NULL, 5, 'Head of Panteion Department of Communication, Media, and Culture'),
+    (28, 5, 'Panteion Department of Psychology', NULL, NULL, 5, 'Head of Panteion Department of Psychology'),
+
+    (29, 6, 'Harokopio Department of Dietetics and Nutritional Science', NULL, NULL, 6, 'Head of Harokopio Department of Dietetics and Nutritional Science'),
+    (30, 6, 'Harokopio Department of Informatics and Telematics', NULL, NULL, 6, 'Head of Harokopio Department of Informatics and Telematics'),
+    (31, 6, 'Harokopio Department of Home Economics and Ecology', NULL, NULL, 6, 'Head of Harokopio Department of Home Economics and Ecology'),
+    (32, 6, 'Harokopio Department of Geography', NULL, NULL, 6, 'Head of Harokopio Department of Geography'),
+
+    (33, 7, 'AUA School of Agricultural Sciences', NULL, NULL, 7, 'Head of AUA School of Agricultural Sciences'),
+    (34, 7, 'AUA School of Food, Biotechnology, and Development', NULL, NULL, 7, 'Head of AUA School of Food, Biotechnology, and Development'),
+    (35, 7, 'AUA School of Natural Resources and Agricultural Engineering', NULL, NULL, 7, 'Head of AUA School of Natural Resources and Agricultural Engineering'),
+
+    (36, 8, 'UniWA Department of Business Administration', NULL, NULL, 8, 'Head of UniWA Department of Business Administration'),
+    (37, 8, 'UniWA Department of Informatics and Computer Engineering', NULL, NULL, 8, 'Head of UniWA Department of Informatics and Computer Engineering'),
+    (38, 8, 'UniWA Department of Civil Engineering', NULL, NULL, 8, 'Head of UniWA Department of Civil Engineering'),
+    (39, 8, 'UniWA Department of Electrical and Computer Engineering', NULL, NULL, 8, 'Head of UniWA Department of Electrical and Computer Engineering'),
+
+    (40, 9, 'UoP Department of Computer Science and Technology', NULL, NULL, 9, 'Head of UoP Department of Computer Science and Technology'),
+    (41, 9, 'UoP Department of Environmental and Natural Resources Management', NULL, NULL, 9, 'Head of UoP Department of Environmental and Natural Resources Management'),
+    (42, 9, 'UoP Department of Economics, Sports Science, and Tourism', NULL, NULL, 9, 'Head of UoP Department of Economics, Sports Science, and Tourism'),
+    (43, 9, 'UoP Department of History, Archaeology, and Cultural Resources Management', NULL, NULL, 9, 'Head of UoP Department of History, Archaeology, and Cultural Resources Management'),
+
+    (44, 10, 'HOU School of Science and Technology', NULL, NULL, 10, 'Head of HOU School of Science and Technology'),
+    (45, 10, 'HOU School of Humanities', NULL, NULL, 10, 'Head of HOU School of Humanities'),
+    (46, 10, 'HOU School of Social Sciences', NULL, NULL, 10, 'Head of HOU School of Social Sciences'),
+    (47, 10, 'HOU School of Applied Arts', NULL, NULL, 10, 'Head of HOU School of Applied Arts');
+
+
+    INSERT INTO Faculty (faculty_id, university_id, faculty_name, contact_phone, contact_email, location_id, head_of_faculty)
 
     # CREATE TABLE IF NOT EXISTS Location
 
 
-# def generate_and_insert_EducationLevel()
-sql_statements = [
-    "INSERT INTO EducationLevel (level_id, level_name, description, entrance_requirements) VALUES (1, 'Bachelors', 'Description for Bachelors', 'Entrance requirements for Bachelors');",
-    "INSERT INTO EducationLevel (level_id, level_name, description, entrance_requirements) VALUES (2, 'Masters', 'Description for Masters', 'Entrance requirements for Masters');",
-    "INSERT INTO EducationLevel (level_id, level_name, description, entrance_requirements) VALUES (3, 'Phd', 'Description for Phd', 'Entrance requirements for Phd');"
-]
-# def generate_and_insert_Degree()
+def generate_and_insert_educationLevel():
+    education_levels = [
+        (1, 'Bachelors', 'Level 6', 'Description for Bachelor', 180),
+        (2, 'Masters', 'Level 7', 'Description for Master', 120),
+        (3, 'Phd', 'Level 8', 'Description for Doctor', 240),
+        (4, 'Associates Degree', 'Level 6', 'Description for Associate', 90),
+        (5, 'Post Graduate Diploma', 'Level 7', 'Description for Post Graduate Diploma', 60),
+        (6, 'Under Graduate Diploma', 'Level 6', 'Description for Under Graduate Diploma', 120),
+    ]
 
-# def generate_and_insert_Program()
+    cursor = connection.cursor()
+
+    insert_query = "INSERT INTO EducationLevel (level_id, level_name, level, description, ects_requirements) VALUES (%s, %s, %s, %s, %s)"
+    cursor.executemany(insert_query, education_levels)
+    connection.commit()
+    print(f"Inserted {len(education_levels)} records into the EducationLevel table.")
+
+
+
+def generate_and_insert_degree():
+
+    degrees = [
+        (1, 1, 'Bachelor of Arts'),
+        (2, 1, 'Bachelor of Science'),
+        (3, 1, 'Bachelor of Law'),
+        (4, 1, 'Bachelor of Medicine'),
+        (5, 1, 'Bachelor of Engineering'),
+        (6, 1, 'Bachelor of Architecture'),
+        (7, 2, 'Master of Arts'),
+        (8, 2, 'Master of Science'),
+        (9, 2, 'Master of Law'),
+        (10, 2, 'Master of Medicine'),
+        (11, 2, 'Master of Engineering'),
+        (12, 2, 'Master of Architecture'),
+        (13, 3, 'Ph.D. in Arts'),
+        (14, 3, 'Ph.D. in Science'),
+        (15, 3, 'Ph.D. in Law'),
+        (16, 3, 'Ph.D. in Medicine'),
+        (17, 3, 'Ph.D. in Engineering'),
+        (18, 3, 'Ph.D. in Architecture'),
+        (19, 4, 'Associate Degree in Arts'),
+        (20, 4, 'Associate Degree in Science'),
+        (21, 5, 'Post Graduate Diploma in Business'),
+        (22, 5, 'Post Graduate Diploma in Law'),
+        (23, 5, 'Post Graduate Diploma in Architecture'),
+        (24, 6, 'Undergraduate Diploma in Law'),
+        (25, 6, 'Undergraduate Diploma in Business'),
+        (26, 6, 'Undergraduate Diploma in IT'),
+    ]
+
+    cursor = connection.cursor()
+
+    insert_query = "INSERT INTO Degree (degree_id, education_level_id, degree_name) VALUES (%s, %s, %s, %s, %s)"
+    cursor.executemany(insert_query, degrees)
+    connection.commit()
+    print(f"Inserted {len(degrees)} records into the EducationLevel table.")
+
+
+
+
+def generate_and_insert_Program():
+
+    programs_list = [
+        (1, 2, 1, 'Masters in Advanced Information Systems', 2022, 'Remote', '4', 'Full Time', 'Technology'),
+        (2, 2, 1, 'Masters in Business Analytics', 2023, 'Hybrid', '5', 'Part Time', 'Business & Finance'),
+        (3, 3, 2, 'Ph.D. in Environmental Engineering Research', 2021, 'Physical', '8', 'Full Time', 'Technology'),
+        (4, 1, 3, 'Bachelor of Arts in Political Science and International Relations', 2022, 'Remote', '6', 'Full Time', 'Arts'),
+        (5, 2, 4, 'Master of Law in Intellectual Property', 2023, 'Physical', '4', 'Part Time', 'Law'),
+        (6, 4, 5, 'Associate Degree in Business and Finance', 2022, 'Hybrid', '2', 'Full Time', 'Business & Finance'),
+        (7, 2, 1, 'Masters in Technology Management', 2023, 'Remote', '5', 'Part Time', 'Technology'),
+        (8, 2, 2, 'Masters in Marketing Analytics', 2022, 'Physical', '4', 'Full Time', 'Business & Finance'),
+        (9, 3, 3, 'Ph.D. in Civil Engineering Structures', 2021, 'Hybrid', '7', 'Part Time', 'Technology'),
+        (10, 1, 4, 'Bachelor of Arts in English Literature', 2022, 'Physical', '6', 'Full Time', 'Arts'),
+        (11, 2, 5, 'Master of Science in Criminal Law', 2023, 'Remote', '4', 'Part Time', 'Law'),
+        (12, 4, 1, 'Associate Degree in IT Management', 2022, 'Hybrid', '2', 'Full Time', 'Technology'),
+        (13, 2, 2, 'Masters in Financial Management', 2023, 'Physical', '5', 'Full Time', 'Business & Finance'),
+        (14, 3, 3, 'Ph.D. in Renewable Energy Engineering', 2021, 'Hybrid', '8', 'Part Time', 'Technology'),
+        (15, 1, 4, 'Bachelor of Arts in History', 2022, 'Remote', '6', 'Full Time', 'Arts'),
+        (16, 2, 5, 'Master of Law in International Human Rights', 2023, 'Physical', '4', 'Part Time', 'Law'),
+        (17, 4, 1, 'Associate Degree in Computer Science', 2022, 'Hybrid', '2', 'Full Time', 'Technology'),
+        (18, 2, 1, 'Masters in Data Science', 2023, 'Remote', '4', 'Part Time', 'Technology'),
+        (19, 3, 2, 'Ph.D. in Aerospace Engineering', 2021, 'Physical', '7', 'Full Time', 'Technology'),
+        (20, 1, 3, 'Bachelor of Arts in Sociology', 2022, 'Hybrid', '6', 'Full Time', 'Arts'),
+        (21, 2, 4, 'Master of Law in Environmental Law', 2023, 'Remote', '4', 'Part Time', 'Law'),
+        (22, 4, 5, 'Associate Degree in Business Administration', 2022, 'Physical', '2', 'Full Time', 'Business & Finance'),
+        (23, 2, 1, 'Masters in Information Technology', 2023, 'Hybrid', '5', 'Full Time', 'Technology'),
+        (24, 2, 2, 'Masters in Human Resource Management', 2022, 'Remote', '4', 'Part Time', 'Business & Finance'),
+        (25, 3, 3, 'Ph.D. in Mechanical Engineering', 2021, 'Physical', '8', 'Full Time', 'Technology'),
+        (26, 1, 4, 'Bachelor of Arts in Psychology', 2022, 'Hybrid', '6', 'Full Time', 'Arts'),
+        (27, 2, 5, 'Master of Law in Corporate Law', 2023, 'Remote', '4', 'Part Time', 'Law'),
+        (28, 4, 1, 'Associate Degree in Software Development', 2022, 'Physical', '2', 'Full Time', 'Technology'),
+        (29, 2, 1, 'Masters in Business Administration', 2023, 'Hybrid', '5', 'Part Time', 'Business & Finance'),
+        (30, 3, 2, 'Ph.D. in Electrical Engineering', 2021, 'Physical', '7', 'Full Time', 'Technology'),
+        (31, 1, 3, 'Bachelor of Arts in Philosophy', 2022, 'Remote', '6', 'Full Time', 'Arts'),
+        (32, 2, 4, 'Master of Law in Intellectual Property Law', 2023, 'Physical', '4', 'Part Time', 'Law'),
+        (33, 4, 5, 'Associate Degree in Network Security', 2022, 'Hybrid', '2', 'Full Time', 'Technology'),
+        (34, 2, 1, 'Masters in Marketing Management', 2023, 'Remote', '4', 'Part Time', 'Business & Finance'),
+        (35, 3, 3, 'Ph.D. in Computer Engineering', 2021, 'Hybrid', '8', 'Full Time', 'Technology'),
+        (36, 1, 4, 'Bachelor of Arts in Creative Writing', 2022, 'Physical', '6', 'Full Time', 'Arts'),
+        (37, 2, 5, 'Master of Law in Criminal Law', 2023, 'Remote', '4', 'Part Time', 'Law'),
+        (38, 4, 1, 'Associate Degree in Mobile App Development', 2022, 'Hybrid', '2', 'Full Time', 'Technology'),
+        (39, 2, 2, 'Masters in Financial Analysis', 2023, 'Physical', '5', 'Full Time', 'Business & Finance'),
+        (40, 3, 3, 'Ph.D. in Software Engineering', 2021, 'Hybrid', '7', 'Part Time', 'Technology'),
+        (41, 1, 4, 'Bachelor of Arts in Political Science', 2022, 'Remote', '6', 'Full Time', 'Arts'),
+        (42, 2, 5, 'Master of Law in International Business Law', 2023, 'Physical', '4', 'Part Time', 'Law'),
+        (43, 4, 1, 'Associate Degree in Information Technology Management', 2022, 'Hybrid', '2', 'Full Time', 'Technology'),
+        (44, 2, 1, 'Masters in Business and IT', 2023, 'Remote', '5', 'Part Time', 'Business & Finance'),
+        (45, 3, 2, 'Ph.D. in Artificial Intelligence', 2021, 'Physical', '8', 'Full Time', 'Technology'),
+        (46, 1, 3, 'Bachelor of Arts in Economics', 2022, 'Hybrid', '6', 'Full Time', 'Arts'),
+        (47, 2, 4, 'Master of Law in Environmental Law and Policy', 2023, 'Remote', '4', 'Part Time', 'Law'),
+        (48, 4, 5, 'Associate Degree in Business and Finance Administration', 2022, 'Physical', '2', 'Full Time', 'Business & Finance'),
+        (49, 2, 1, 'Masters in Information Systems Management', 2023, 'Hybrid', '4', 'Part Time', 'Technology'),
+        (50, 2, 2, 'Masters in Human Resource Development', 2022, 'Physical', '5', 'Full Time', 'Business & Finance')
+    ]
+
+    cursor = connection.cursor()
+
+    insert_query = "INSERT INTO Program (program_id, awarded_degree, faculty_id, program_name, year_started, teaching_type, semesters, pace, subject_type) VALUES (%s, %s, %s, %s, %s)"
+    cursor.executemany(insert_query, programs_list)
+    connection.commit()
+    print(f"Inserted {len(programs_list)} records into the EducationLevel table.")
+
+
 
 # def generate_and_insert_Programterm()
 
