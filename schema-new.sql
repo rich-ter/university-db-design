@@ -159,6 +159,7 @@ CREATE TABLE
         end_date DATE NOT NULL,
         max_capacity INT NOT NULL,
         registered_students INT,
+        description varchar
         FOREIGN KEY (program_id) REFERENCES Program(program_id)
     );
 
