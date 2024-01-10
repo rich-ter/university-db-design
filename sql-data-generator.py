@@ -154,7 +154,6 @@ def create_database_and_tables():
         FOREIGN KEY (enrollment_id) REFERENCES Enrollment(enrollment_id)
     );
     
-    
     CREATE TABLE IF NOT EXISTS Company (
         company_id INT PRIMARY KEY,
         company_name VARCHAR(255) NOT NULL,
@@ -225,6 +224,7 @@ def generate_and_insert_locations(num):
 
     return location_ids
 
+
 def generate_and_insert_students(num):
     students = []
 
@@ -254,6 +254,7 @@ def generate_and_insert_students(num):
         print(f"Error: {err}")
     finally:
         cursor.close()
+
 
 def generate_and_insert_universities(num, location_ids):
     universities = []
@@ -304,6 +305,8 @@ def generate_and_insert_universities(num, location_ids):
         cursor.close()
 
 # this is not finished yet
+
+
 def generate_and_insert_faculties():
     faculties = [
         (1, 1, 'NKUA Faculty of Arts', 5551234,
@@ -420,6 +423,7 @@ def generate_and_insert_faculties():
     print(
         f"Inserted {len(faculties)} records into the Faculty table.")
 
+
 def generate_and_insert_educationLevel():
     education_levels = [
         (1, 'Bachelors', 'Level 6', 'Description for Bachelor', 180),
@@ -439,6 +443,7 @@ def generate_and_insert_educationLevel():
     connection.commit()
     print(
         f"Inserted {len(education_levels)} records into the EducationLevel table.")
+
 
 def generate_and_insert_degree():
 
@@ -480,6 +485,8 @@ def generate_and_insert_degree():
 
 # SOS! NEED TO CHANGE THE PROGRAMS TO INCLUDE FACULTIES FROM 19-23 WHICH IS THE UOP FACULTY ID
 # DO THE SAME FOR OTHER PROGRAMS - DIVERSE THE 3RD ID BY A LOT.
+
+
 def generate_and_insert_Program():
 
     programs_list = [
@@ -648,6 +655,7 @@ def generate_and_insert_Program():
     connection.commit()
     print(
         f"Inserted {len(programs_list)} records into the Program table.")
+
 
 def generate_and_insert_Programterm():
 
@@ -978,6 +986,7 @@ def generate_and_insert_Programterm():
     print(
         f"Inserted {len(program_terms)} records into the Program_Term table.")
 
+
 def generate_and_insert_modules():
 
     modules_list = [
@@ -1111,6 +1120,7 @@ def generate_and_insert_modules():
     connection.commit()
     print(f"Inserted {len(modules_list)} records into the Modules table.")
 
+
 bachelor_program_term_ids = [
     4, 10, 14, 20, 24, 30, 34, 40, 44, 50,
     54, 60, 64, 70, 74, 80, 84, 90, 94, 100,
@@ -1123,6 +1133,7 @@ bachelor_program_term_ids = [
 master_program_term_ids = []
 
 # ENROLLS STUDENTS ONLY FOR BACHELOR DEGREES AND NONE RELATED TO UNIPI
+
 
 def generate_and_insert_enrollments(num):
     enrollments = []
@@ -1170,6 +1181,7 @@ def generate_and_insert_enrollments(num):
     finally:
         cursor.close()
 
+
 def generate_and_insert_companies(num_companies):
     cursor = connection.cursor()
 
@@ -1199,6 +1211,7 @@ def generate_and_insert_companies(num_companies):
     finally:
         cursor.close()
 
+
 def generate_and_insert_job_titles(num_job_titles):
     cursor = connection.cursor()
 
@@ -1227,8 +1240,6 @@ def generate_and_insert_job_titles(num_job_titles):
         cursor.close()
 
 
-
-        
 ##### ALL THESE WORK ######
 # generate_and_insert_locations(100)
 # generate_and_insert_students(100)
@@ -1247,7 +1258,57 @@ def generate_and_insert_job_titles(num_job_titles):
 
 ##### NOT TESTED YET ######
 # def generate_and_insert_student_module_results()
-# def generate_and_insert_student_graduation()
+
+
+##### TESTING ######
+
+
+def generate_and_insert_student_graduation():
+    location_id_range = range(1, 11)  # Example: 1 to 10
+
+    def generate_and_insert_graduations(num_enrollments):
+        graduations = []
+
+        # Generate graduation data based on enrollment ids
+        for enrollment_id in range(1, num_enrollments + 1):
+            final_grade = random.randint(60, 100)  # Example grade range
+            graduation_date = fake.date_between(
+                start_date="today", end_date="+4y")
+            top_of_class = random.choice([True, False])
+            location_id = random.choice(location_id_range)
+
+            graduation = (
+                # graduation_id (assuming it's the same as enrollment_id for simplicity)
+                enrollment_id,
+                enrollment_id,              # enrollment_id
+                final_grade,                # final_grade
+                graduation_date,            # graduation_date
+                top_of_class,               # top_of_class
+                location_id,                # location_id
+            )
+            graduations.append(graduation)
+
+        # Create a cursor object
+        cursor = connection.cursor()
+
+        # SQL query for inserting data
+        insert_query = """
+        INSERT INTO Graduation 
+        (graduation_id, enrollment_id, final_grade, graduation_date, top_of_class, location_id) 
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+
+        try:
+            cursor.executemany(insert_query, graduations)
+            connection.commit()
+            print(
+                f"Inserted {len(graduations)} records into the Graduation table.")
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+        finally:
+            cursor.close()
+
+
 # def generate_and_insert_work_experience(num_records):
 #     work_experiences = []
 
@@ -1275,17 +1336,14 @@ def generate_and_insert_job_titles(num_job_titles):
 #             responsibilities,           # responsibilities
 #         )
 #         work_experiences.append(work_experience)
-
 #     # Create a cursor object
 #     cursor = connection.cursor()
-
 #     # SQL query for inserting data
 #     insert_query = """
-#     INSERT INTO WorkExperience 
-#     (experience_id, student_id, company_id, job_title_id, job_category, start_date, end_date, description, responsibilities) 
+#     INSERT INTO WorkExperience
+#     (experience_id, student_id, company_id, job_title_id, job_category, start_date, end_date, description, responsibilities)
 #     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 #     """
-
 #     try:
 #         cursor.executemany(insert_query, work_experiences)
 #         connection.commit()
@@ -1295,8 +1353,5 @@ def generate_and_insert_job_titles(num_job_titles):
 #         print(f"Error: {err}")
 #     finally:
 #         cursor.close()
-        
-
-
 # Close the connection
 connection.close()
