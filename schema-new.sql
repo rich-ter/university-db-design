@@ -73,41 +73,50 @@ CREATE TABLE
         student_id INT NOT NULL,
         program_term_id INT NOT NULL,
         registration_date DATE NOT NULL,
-        graduation_id INT NOT NULL,
         FOREIGN KEY (student_id) REFERENCES Student(student_id),
         FOREIGN KEY (program_term_id) REFERENCES Program_Term(program_term_id),
-        FOREIGN KEY (graduation_id) REFERENCES Graduation(graduation_id)
     );
 
-CREATE TABLE
-    Graduation (
+    CREATE TABLE IF NOT EXISTS Graduation (
         graduation_id INT PRIMARY KEY,
+        enrollment_id INT NOT NULL,
         final_grade INT NOT NULL,
         graduation_date DATE NOT NULL,
         top_of_class BOOLEAN NOT NULL,
         location_id INT NOT NULL,
-        FOREIGN KEY (location_id) REFERENCES Location(location_id)
+        FOREIGN KEY (location_id) REFERENCES Location(location_id),
+        FOREIGN KEY (enrollment_id) REFERENCES Enrollment(enrollment_id)
     );
-CREATE TABLE Program (
-    program_id INT PRIMARY KEY,
-    awarded_degree INT NOT NULL,
-    faculty_id INT NOT NULL,
-    program_name VARCHAR(255) NOT NULL,
-    year_started YEAR NOT NULL,
-    subject_type ENUM(
-    'Business & Finance',
-    'Technology',
-    'Law',
-    'Arts',
-    'Architecture'
-) NOT NULL,
-    teaching_type ENUM('Physical', 'Remote', 'Hybrid'),
-    semesters ENUM('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12') NOT NULL,
-    pace ENUM('Full Time', 'Part Time') NOT NULL,
-    FOREIGN KEY (faculty_id) REFERENCES Faculty(faculty_id),
-    FOREIGN KEY (awarded_degree) REFERENCES Degree(degree_id)
-);
+    CREATE TABLE IF NOT EXISTS Program (
+        program_id INT PRIMARY KEY,
+        awarded_degree INT not null,
+        faculty_id INT NOT NULL,
+        program_name VARCHAR(255) NOT NULL,
+        year_started YEAR NOT NULL,
+        teaching_type ENUM('Physical', 'Remote', 'Hybrid'),
+        semesters INT NOT NULL,
+        pace ENUM('Full Time', 'Part Time') NOT NULL,
+        subject_type ENUM(
+        'Business & Finance',
+        'Technology',
+        'Law',
+        'Arts',
+        'Architecture'),
+        FOREIGN KEY (faculty_id) REFERENCES Faculty(faculty_id),
+        FOREIGN KEY (awarded_degree) REFERENCES Degree(degree_id)
+    );
 
+
+CREATE TABLE
+    Program_Term (
+        program_term_id INT PRIMARY KEY,
+        program_id INT NOT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL,
+        max_capacity INT NOT NULL,
+        description varchar,
+        FOREIGN KEY (program_id) REFERENCES Program(program_id)
+    );
 
 CREATE TABLE
     EducationLevel (
@@ -134,7 +143,13 @@ CREATE TABLE
         module_id INT PRIMARY KEY,
         program_term_id INT NOT NULL,
         module_name VARCHAR(255) NOT NULL,
-        module_subject VARCHAR(255) NOT NULL,
+        module_subject ENUM(
+          'Financial Management', 'Accounting Principles', 'Business Ethics', 'Marketing Strategies', 'Entrepreneurship', -- Business & Finance
+          'Front-end Development', 'Back-end Development', 'Database Management', 'Mobile App Development', 'Cybersecurity', -- Technology
+          'Criminal Law', 'Contract Law', 'Constitutional Law', 'International Law', 'Legal Research and Writing', -- Law
+          'Fine Arts', 'Performing Arts', 'Visual Arts', 'Art History', 'Creative Writing', -- Arts
+          'Architectural Design', 'Structural Engineering', 'Urban Planning', 'Sustainable Architecture', 'History of Architecture' -- Architecture
+        ),
         module_points INT NOT NULL,
         semester VARCHAR(255) NOT NULL,
         FOREIGN KEY (program_term_id) REFERENCES Program_Term(program_term_id)
@@ -151,17 +166,6 @@ CREATE TABLE
         FOREIGN KEY (student_id) REFERENCES Student(student_id)
     );
 
-CREATE TABLE
-    Program_Term (
-        program_term_id INT PRIMARY KEY,
-        program_id INT NOT NULL,
-        start_date DATE NOT NULL,
-        end_date DATE NOT NULL,
-        max_capacity INT NOT NULL,
-        registered_students INT,
-        description varchar
-        FOREIGN KEY (program_id) REFERENCES Program(program_id)
-    );
 
 CREATE TABLE
     Faculty (
