@@ -6,43 +6,28 @@ import random
 
 fake = Faker('el_GR')  # Set the locale to Greek (Greece)
 
-database_name = "school_database"
-
-create_db_query = f"CREATE DATABASE IF NOT EXISTS {database_name}"
-
-connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database=database_name
-)
-
-cursor = connection.cursor()
-
-cursor.execute(create_db_query)
-cursor.execute(f"USE {database_name}")
-
-
-def create_database_and_tables():
-    create_db_query = f"CREATE DATABASE IF NOT EXISTS {database_name}"
-    create_db_tables = """
+# Working perfect 
+def create_database_and_tables(connection):
+    create_db_tables = [
+    """
 	CREATE TABLE IF NOT EXISTS Location (
         location_id INT PRIMARY KEY,
         address VARCHAR(255) NOT NULL,
         city VARCHAR(255) NOT NULL,
         postcode INT NOT NULL
     );
-          
+    """,
+    """      
 	CREATE TABLE IF NOT EXISTS University (
         university_id INT PRIMARY KEY,
         university_name VARCHAR(255) NOT NULL,
         founded_year YEAR NOT NULL,
         website VARCHAR(255),
         location_id INT NOT NULL,
-        faculty_count INT,
         FOREIGN KEY (location_id) REFERENCES Location(location_id)
     );
-
+    """,
+    """
     CREATE TABLE IF NOT EXISTS Faculty (
         faculty_id INT PRIMARY KEY,
         university_id INT NOT NULL,
@@ -54,7 +39,8 @@ def create_database_and_tables():
         FOREIGN KEY (university_id) REFERENCES University(university_id),
         FOREIGN KEY (location_id) REFERENCES Location(location_id)
     );        
-        
+    """,
+    """
     CREATE TABLE IF NOT EXISTS EducationLevel (
         level_id INT PRIMARY KEY,
         level_name ENUM('Bachelors', 'Masters', 'Phd', 'Associates', 'Post Graduate Diploma', 'Under Graduate Diploma'),
@@ -62,14 +48,16 @@ def create_database_and_tables():
         description VARCHAR(255),
         ects_requirements INT NOT NULL
     );
-
+    """,
+    """
     CREATE TABLE IF NOT EXISTS Degree (
         degree_id INT PRIMARY KEY,
         education_level_id INT NOT NULL,
         degree_name VARCHAR(255) NOT NULL,
         FOREIGN KEY (education_level_id) REFERENCES EducationLevel(level_id)
     );
-       
+    """,
+    """
     CREATE TABLE IF NOT EXISTS Program (
         program_id INT PRIMARY KEY,
         awarded_degree INT not null,
@@ -88,17 +76,19 @@ def create_database_and_tables():
         FOREIGN KEY (faculty_id) REFERENCES Faculty(faculty_id),
         FOREIGN KEY (awarded_degree) REFERENCES Degree(degree_id)
     );
-
+    """,
+    """
     CREATE TABLE IF NOT EXISTS Program_Term (
         program_term_id INT PRIMARY KEY,
         program_id INT NOT NULL,
         start_date DATE NOT NULL,
         end_date DATE NOT NULL,
         max_capacity INT NOT NULL,
-        description varchar, 
+        description VARCHAR(255), 
         FOREIGN KEY (program_id) REFERENCES Program(program_id)
     );
-
+    """,
+    """
     CREATE TABLE IF NOT EXISTS Modules (
         module_id INT PRIMARY KEY,
         program_term_id INT NOT NULL,
@@ -114,7 +104,8 @@ def create_database_and_tables():
         semester VARCHAR(255) NOT NULL,
         FOREIGN KEY (program_term_id) REFERENCES Program_Term(program_term_id)
     );
-
+    """,
+    """
 	CREATE TABLE IF NOT EXISTS Student (
         student_id INT PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
@@ -123,17 +114,17 @@ def create_database_and_tables():
         email VARCHAR(255) NOT NULL,
         date_of_birth DATE NOT NULL
     );
-            
-   CREATE TABLE IF NOT EXISTS StudentModuleResults (
-        result_id INT PRIMARY KEY,
+    """,
+    """ 
+   CREATE TABLE IF NOT EXISTS StudentModuleParticipation (
+        stud_mod_id INT PRIMARY KEY,
         module_id INT NOT NULL,
         student_id INT NOT NULL,
-        result_grade VARCHAR(255) NOT NULL,
-        passed BOOLEAN,
         FOREIGN KEY (module_id) REFERENCES Modules(module_id),
         FOREIGN KEY (student_id) REFERENCES Student(student_id)
     );
-    
+    """,
+    """
     CREATE TABLE IF NOT EXISTS Enrollment (
         enrollment_id INT PRIMARY KEY,
         student_id INT NOT NULL,
@@ -142,6 +133,8 @@ def create_database_and_tables():
         FOREIGN KEY (student_id) REFERENCES Student(student_id),
         FOREIGN KEY (program_term_id) REFERENCES Program_Term(program_term_id)
     );
+    """,
+    """
 
     CREATE TABLE IF NOT EXISTS Graduation (
         graduation_id INT PRIMARY KEY,
@@ -153,6 +146,8 @@ def create_database_and_tables():
         FOREIGN KEY (location_id) REFERENCES Location(location_id),
         FOREIGN KEY (enrollment_id) REFERENCES Enrollment(enrollment_id)
     );
+    """,
+    """
     
     CREATE TABLE IF NOT EXISTS Company (
         company_id INT PRIMARY KEY,
@@ -162,6 +157,8 @@ def create_database_and_tables():
         industry ENUM('Telecommunications', 'Hospitality', 'Shipping', 'Engineering', 'Software', 'Auditing', 'Banking', 'Other'),
         FOREIGN KEY (location_id) REFERENCES Location(location_id)
     );
+    """,
+    """
 
     CREATE TABLE IF NOT EXISTS JobTitle (
         title_id INT PRIMARY KEY,
@@ -169,7 +166,8 @@ def create_database_and_tables():
         job_type ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
         description VARCHAR(255) NOT NULL
     );
-        
+    """,
+    """
     CREATE TABLE IF NOT EXISTS WorkExperience (
         experience_id INT PRIMARY KEY,
         student_id INT NOT NULL,
@@ -181,36 +179,39 @@ def create_database_and_tables():
         description VARCHAR(255) NOT NULL,
         responsibilities VARCHAR(255) NOT NULL,
         FOREIGN KEY (student_id) REFERENCES Student(student_id),
-        FOREIGN KEY (company_id) REFERENCESs Company(company_id),
+        FOREIGN KEY (company_id) REFERENCES Company(company_id),
         FOREIGN KEY (job_title_id) REFERENCES JobTitle(title_id)
     );
-"""
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(create_db_query)
-            cursor.execute(create_db_tables)
+    """
+    ]
 
+    try:
+        cursor = connection.cursor()
+        for create_table_query in create_db_tables:
+            cursor.execute(create_table_query)
+        connection.commit()  # Commit after all tables are created
     except Error as e:
         print(e)
+    finally:
+        cursor.close()
 
-
-def generate_and_insert_locations(num):
+# Working perfect 
+def generate_and_insert_locations(connection, num):
     locations = []
     location_ids = []
-    # Generate fake data
+
     for i in range(1, num + 1):
         location = (
-            i,                           # location_id
-            fake.address(),              # location_address
+            i,                           
+            fake.address(),              
             fake.city(),                 # city
-            fake.random_int(min=10000, max=99999)  # postcode
+            fake.random_int(min=10000, max=99999)  
         )
         locations.append(location)
         location_ids.append(i)
 
     cursor = connection.cursor()
 
-    # Assuming your table has columns (location_id, location_address, city, postcode)
     insert_query = "INSERT INTO Location (location_id, address, city, postcode) VALUES (%s, %s, %s, %s)"
 
     try:
@@ -224,26 +225,23 @@ def generate_and_insert_locations(num):
 
     return location_ids
 
-
-def generate_and_insert_students(num):
+# Working perfect 
+def generate_and_insert_students(connection, num):
     students = []
 
-    # Generate fake data
     for i in range(1, num + 1):
         student = (
-            i,                           # student_id
-            fake.first_name(),           # first_name
-            fake.last_name(),            # last_name
-            fake.first_name(),           # father_name
-            fake.email(),                # email
-            fake.date_of_birth(),        # date_of_birth
+            i,                           
+            fake.first_name(),           
+            fake.last_name(),            
+            fake.first_name(),           
+            fake.email(),                
+            fake.date_of_birth(),       
         )
         students.append(student)
 
-    # Create a cursor object
     cursor = connection.cursor()
 
-    # Assuming your table has columns (student_id, first_name, last_name, father_name, email, date_of_birth)
     insert_query = "INSERT INTO Student (student_id, first_name, last_name, father_name, email, date_of_birth) VALUES (%s, %s, %s, %s, %s, %s)"
 
     try:
@@ -255,11 +253,10 @@ def generate_and_insert_students(num):
     finally:
         cursor.close()
 
-
-def generate_and_insert_universities(num, location_ids):
+# Working perfect 
+def generate_and_insert_universities(connection):
     universities = []
 
-    # Use the provided list of university names
     athens_universities = [
         "National and Kapodistrian University of Athens",
         "National Technical University of Athens",
@@ -273,26 +270,19 @@ def generate_and_insert_universities(num, location_ids):
         "Hellenic Open University",
     ]
 
-    random.shuffle(location_ids)
-
-    # Generate fake data
-    # Generate entries for each Athens university
     for i, university_name in enumerate(athens_universities, start=1):
         university = (
-            i,                                    # university_id
-            university_name,                      # university_name
-            fake.random_int(min=1902, max=2024),   # founded_year
-            fake.url(),                            # website
-            location_ids[i - 1],          # location_id
-            fake.random_int(min=1, max=1000),      # faculty_count
+            i,                                    
+            university_name,                      
+            fake.random_int(min=1902, max=2024),   
+            fake.url(),                            
+            fake.random_int(min=1, max=100),   
         )
         universities.append(university)
 
-    # Create a cursor object
     cursor = connection.cursor()
 
-    # Assuming your table has columns (university_id, university_name, founded_year, website, location_id, faculty_count)
-    insert_query = "INSERT INTO University (university_id, university_name, founded_year, website, location_id, faculty_count) VALUES (%s, %s, %s, %s, %s, %s)"
+    insert_query = "INSERT INTO University (university_id, university_name, founded_year, website, location_id) VALUES (%s, %s, %s, %s, %s)"
 
     try:
         cursor.executemany(insert_query, universities)
@@ -304,10 +294,8 @@ def generate_and_insert_universities(num, location_ids):
     finally:
         cursor.close()
 
-# this is not finished yet
-
-
-def generate_and_insert_faculties():
+# Working perfect 
+def generate_and_insert_faculties(connection):
     faculties = [
         (1, 1, 'NKUA Faculty of Arts', 5551234,
          'arts_head@example.com', 11, 'Head of NKUA Faculty of Arts'),
@@ -321,7 +309,6 @@ def generate_and_insert_faculties():
          'engineering_head@example.com', 15, 'Head of NKUA Faculty of Engineering'),
         (6, 1, 'NKUA Faculty of Architecture', 5553456,
          'architecture_head@example.com', 16, 'Head of NKUA Faculty of Architecture'),
-
         (7, 2, 'NTUA School of Civil Engineering', 5552345,
          'civil_eng_head@example.com', 17, 'Head of NTUA School of Civil Engineering'),
         (8, 2, 'NTUA School of Mechanical Engineering', 5558765,
@@ -334,7 +321,6 @@ def generate_and_insert_faculties():
          'rural_eng_head@example.com', 21, 'Head of NTUA School of Rural and Surveying Engineering'),
         (12, 2, 'NTUA School of Applied Mathematical and Physical Sciences', 5553210,
          'applied_sciences_head@example.com', 22, 'Head of NTUA School of Applied Mathematical and Physical Sciences'),
-
         (13, 3, 'AUEB Department of Business Administration', 5554321,
          'business_admin_head@example.com', 23, 'Head of AUEB Department of Business Administration'),
         (14, 3, 'AUEB Department of Economics', 5555678,
@@ -347,7 +333,6 @@ def generate_and_insert_faculties():
          'accounting_finance_head@example.com', 27, 'Head of AUEB Department of Accounting and Finance'),
         (18, 3, 'AUEB Department of Management Science and Technology', 5555432,
          'management_science_head@example.com', 28, 'Head of AUEB Department of Management Science and Technology'),
-
         (19, 4, 'UoP Department of Banking and Financial Management', 5553456,
          'banking_finance_head@example.com', 29, 'Head of UoP Department of Banking and Financial Management'),
         (20, 4, 'UoP Department of Business Administration', 5552109,
@@ -358,7 +343,6 @@ def generate_and_insert_faculties():
          'intl_european_studies_head@example.com', 32, 'Head of UoP Department of International and European Studies'),
         (23, 4, 'UoP Department of Digital Systems', 5555678,
          'digital_systems_head@example.com', 33, 'Head of UoP Department of Digital Systems'),
-
         (24, 5, 'Panteion Department of Political Science and History', 5557890,
          'political_history_head@example.com', 34, 'Head of Panteion Department of Political Science and History'),
         (25, 5, 'Panteion Department of Sociology', 5558765,
@@ -369,7 +353,6 @@ def generate_and_insert_faculties():
          'media_culture_head@example.com', 37, 'Head of Panteion Department of Communication, Media, and Culture'),
         (28, 5, 'Panteion Department of Psychology', 5552109,
          'psychology_head@example.com', 38, 'Head of Panteion Department of Psychology'),
-
         (29, 6, 'Harokopio Department of Dietetics and Nutritional Science', 5553210,
          'dietetics_nutrition_head@example.com', 39, 'Head of Harokopio Department of Dietetics and Nutritional Science'),
         (30, 6, 'Harokopio Department of Informatics and Telematics', 5554321,
@@ -378,14 +361,12 @@ def generate_and_insert_faculties():
          'home_economics_ecology_head@example.com', 41, 'Head of Harokopio Department of Home Economics and Ecology'),
         (32, 6, 'Harokopio Department of Geography', 5557890,
          'geography_head@example.com', 42, 'Head of Harokopio Department of Geography'),
-
         (33, 7, 'AUA School of Agricultural Sciences', 5559876,
          'agricultural_sciences_head@example.com', 43, 'Head of AUA School of Agricultural Sciences'),
         (34, 7, 'AUA School of Food, Biotechnology, and Development', 5558765,
          'food_biotech_head@example.com', 44, 'Head of AUA School of Food, Biotechnology, and Development'),
         (35, 7, 'AUA School of Natural Resources and Agricultural Engineering', 5555432,
          'natural_resources_eng_head@example.com', 45, 'Head of AUA School of Natural Resources and Agricultural Engineering'),
-
         (36, 8, 'UniWA Department of Business Administration', 5552109,
          'uniwa_business_admin_head@example.com', 46, 'Head of UniWA Department of Business Administration'),
         (37, 8, 'UniWA Department of Informatics and Computer Engineering', 5553210,
@@ -394,7 +375,6 @@ def generate_and_insert_faculties():
          'civil_eng_head@example.com', 48, 'Head of UniWA Department of Civil Engineering'),
         (39, 8, 'UniWA Department of Electrical and Computer Engineering', 5555678,
          'ece_head@example.com', 49, 'Head of UniWA Department of Electrical and Computer Engineering'),
-
         (40, 9, 'UoP Department of Computer Science and Technology', 5557890,
          'uop_comp_sci_head@example.com', 50, 'Head of UoP Department of Computer Science and Technology'),
         (41, 9, 'UoP Department of Environmental and Natural Resources Management', 5558765,
@@ -403,7 +383,6 @@ def generate_and_insert_faculties():
          'econ_sports_tourism_head@example.com', 52, 'Head of UoP Department of Economics, Sports Science, and Tourism'),
         (43, 9, 'UoP Department of History, Archaeology, and Cultural Resources Management', 5559876,
          'history_archaeology_head@example.com', 53, 'Head of UoP Department of History, Archaeology, and Cultural Resources Management'),
-
         (44, 10, 'HOU School of Science and Technology', 5552109,
          'hou_science_tech_head@example.com', 54, 'Head of HOU School of Science and Technology'),
         (45, 10, 'HOU School of Humanities', 5553210,
@@ -412,7 +391,6 @@ def generate_and_insert_faculties():
          'hou_social_sciences_head@example.com', 56, 'Head of HOU School of Social Sciences'),
         (47, 10, 'HOU School of Applied Arts', 5555678,
          'hou_applied_arts_head@example.com', 57, 'Head of HOU School of Applied Arts'),
-
     ]
 
     cursor = connection.cursor()
@@ -423,8 +401,8 @@ def generate_and_insert_faculties():
     print(
         f"Inserted {len(faculties)} records into the Faculty table.")
 
-
-def generate_and_insert_educationLevel():
+# Working perfect 
+def generate_and_insert_educationLevel(connection):
     education_levels = [
         (1, 'Bachelors', 'Level 6', 'Description for Bachelor', 180),
         (2, 'Masters', 'Level 7', 'Description for Master', 120),
@@ -444,8 +422,8 @@ def generate_and_insert_educationLevel():
     print(
         f"Inserted {len(education_levels)} records into the EducationLevel table.")
 
-
-def generate_and_insert_degree():
+# Working perfect 
+def generate_and_insert_degree(connection):
 
     degrees = [
         (1, 1, 'Bachelor of Arts'),
@@ -483,16 +461,13 @@ def generate_and_insert_degree():
     connection.commit()
     print(f"Inserted {len(degrees)} records into the EducationLevel table.")
 
-# SOS! NEED TO CHANGE THE PROGRAMS TO INCLUDE FACULTIES FROM 19-23 WHICH IS THE UOP FACULTY ID
-# DO THE SAME FOR OTHER PROGRAMS - DIVERSE THE 3RD ID BY A LOT.
-
-
-def generate_and_insert_Program():
+# Working perfect 
+def generate_and_insert_Program(connection):
 
     programs_list = [
         (1, 8, 23, 'Masters in Advanced Information Systems',
          2022, 'Remote', '4', 'Full Time', 'Technology'),
-        (2, 8, 1, 'Masters in Business Analytics', 2023,
+        (2, 8, 20, 'Masters in Business Analytics', 2023,
          'Hybrid', '5', 'Part Time', 'Business & Finance'),
         (3, 17, 2, 'Ph.D. in Environmental Engineering Research',
          2021, 'Physical', '8', 'Full Time', 'Technology'),
@@ -500,9 +475,9 @@ def generate_and_insert_Program():
          2022, 'Remote', '6', 'Full Time', 'Arts'),
         (5, 9, 4, 'Master of Law in Intellectual Property',
          2023, 'Physical', '4', 'Part Time', 'Law'),
-        (6, 20, 5, 'Associate Degree in Business and Finance',
+        (6, 20, 20, 'Associate Degree in Business and Finance',
          2022, 'Hybrid', '2', 'Full Time', 'Business & Finance'),
-        (7, 8, 1, 'Masters in Technology Management',
+        (7, 8, 23, 'Masters in Technology Management',
          2023, 'Remote', '5', 'Part Time', 'Technology'),
         (8, 8, 2, 'Masters in Marketing Analytics', 2022,
          'Physical', '4', 'Full Time', 'Business & Finance'),
@@ -514,7 +489,7 @@ def generate_and_insert_Program():
          2023, 'Remote', '4', 'Part Time', 'Law'),
         (12, 20, 1, 'Associate Degree in IT Management',
          2022, 'Hybrid', '2', 'Full Time', 'Technology'),
-        (13, 8, 2, 'Masters in Financial Management', 2023,
+        (13, 8, 19, 'Masters in Financial Management', 2023,
          'Physical', '5', 'Full Time', 'Business & Finance'),
         (14, 17, 3, 'Ph.D. in Renewable Energy Engineering',
          2021, 'Hybrid', '8', 'Part Time', 'Technology'),
@@ -522,7 +497,7 @@ def generate_and_insert_Program():
          2022, 'Remote', '6', 'Full Time', 'Arts'),
         (16, 9, 5, 'Master of Law in International Human Rights',
          2023, 'Physical', '4', 'Part Time', 'Law'),
-        (17, 20, 1, 'Associate Degree in Computer Science',
+        (17, 20, 23, 'Associate Degree in Computer Science',
          2022, 'Hybrid', '2', 'Full Time', 'Technology'),
         (18, 8, 1, 'Masters in Data Science', 2023,
          'Remote', '4', 'Part Time', 'Technology'),
@@ -532,7 +507,7 @@ def generate_and_insert_Program():
          2022, 'Hybrid', '6', 'Full Time', 'Arts'),
         (21, 9, 4, 'Master of Law in Environmental Law',
          2023, 'Remote', '4', 'Part Time', 'Law'),
-        (22, 20, 5, 'Associate Degree in Business Administration',
+        (22, 20, 19, 'Associate Degree in Business Administration',
          2022, 'Physical', '2', 'Full Time', 'Business & Finance'),
         (23, 8, 23, 'Masters in Information Technology',
          2023, 'Hybrid', '5', 'Full Time', 'Technology'),
@@ -554,7 +529,7 @@ def generate_and_insert_Program():
          2022, 'Remote', '6', 'Full Time', 'Arts'),
         (32, 9, 5, 'Master of Law in Intellectual Property Law',
          2023, 'Physical', '4', 'Part Time', 'Law'),
-        (33, 20, 1, 'Associate Degree in Network Security',
+        (33, 20, 23, 'Associate Degree in Network Security',
          2022, 'Hybrid', '2', 'Full Time', 'Technology'),
         (34, 8, 2, 'Masters in Marketing Management', 2023,
          'Remote', '4', 'Part Time', 'Business & Finance'),
@@ -568,7 +543,7 @@ def generate_and_insert_Program():
          2022, 'Hybrid', '2', 'Full Time', 'Technology'),
         (39, 8, 2, 'Masters in Financial Analysis', 2023,
          'Physical', '5', 'Full Time', 'Business & Finance'),
-        (40, 17, 3, 'Ph.D. in Software Engineering',
+        (40, 17, 23, 'Ph.D. in Software Engineering',
          2021, 'Hybrid', '7', 'Part Time', 'Technology'),
         (41, 1, 4, 'Bachelor of Arts in Political Science',
          2022, 'Remote', '6', 'Full Time', 'Arts'),
@@ -578,7 +553,7 @@ def generate_and_insert_Program():
          2022, 'Hybrid', '2', 'Full Time', 'Technology'),
         (44, 8, 1, 'Masters in Business and IT', 2023,
          'Remote', '5', 'Part Time', 'Business & Finance'),
-        (45, 17, 2, 'Ph.D. in Artificial Intelligence',
+        (45, 17, 23, 'Ph.D. in Artificial Intelligence',
          2021, 'Physical', '8', 'Full Time', 'Technology'),
         (46, 1, 3, 'Bachelor of Arts in Economics',
          2022, 'Hybrid', '6', 'Full Time', 'Arts'),
@@ -586,9 +561,9 @@ def generate_and_insert_Program():
          2023, 'Remote', '4', 'Part Time', 'Law'),
         (48, 20, 5, 'Associate Degree in Business and Finance Administration',
          2022, 'Physical', '2', 'Full Time', 'Business & Finance'),
-        (49, 8, 1, 'Masters in Information Systems Management',
+        (49, 8, 23, 'Masters in Information Systems Management',
          2023, 'Hybrid', '4', 'Part Time', 'Technology'),
-        (50, 8, 2, 'Masters in Human Resource Development', 2022,
+        (50, 8, 20, 'Masters in Human Resource Development', 2022,
          'Physical', '5', 'Full Time', 'Business & Finance'),
         (51, 2, 23, 'Bachelor of Science in Computer Science',
          2022, 'Physical', '8', 'Full Time', 'Technology'),
@@ -656,8 +631,8 @@ def generate_and_insert_Program():
     print(
         f"Inserted {len(programs_list)} records into the Program table.")
 
-
-def generate_and_insert_Programterm():
+# Most prob checkk again
+def generate_and_insert_Programterm(connection):
 
     program_terms = [
         (1, 1, '2023-01-01', '2023-12-31', 100,
@@ -986,8 +961,9 @@ def generate_and_insert_Programterm():
     print(
         f"Inserted {len(program_terms)} records into the Program_Term table.")
 
-
-def generate_and_insert_modules():
+# CHECK AGAIN AND ADD MORE WHEN GPT4 AVIALABLE.
+# MAKE SURE THAT THE PROGRAM_TERM_IDS MATCH THE UOP COURSES IN MOST CASES.
+def generate_and_insert_modules(connection):
 
     modules_list = [
         (1, 1, 'Introduction to Financial Management',
@@ -1066,51 +1042,36 @@ def generate_and_insert_modules():
          'Sustainable Architecture', 4, 'Spring'),
         (50, 70, 'Contemporary Trends in Architecture',
          'History of Architecture', 3, 'Summer'),
-        (51, 4, 'Global Political Systems', 'Political Science', 4, 'Fall'),
-        (52, 4, 'International Relations Theory',
-         'International Relations', 4, 'Spring'),
-        (53, 10, 'Literary Analysis and Criticism', 'English Literature', 3, 'Fall'),
-        (54, 10, 'Contemporary World Literature',
-         'English Literature', 3, 'Spring'),
-        (55, 20, 'Sociological Theories', 'Sociology', 3, 'Fall'),
-        (56, 20, 'Social Research Methods', 'Sociology', 4, 'Spring'),
-        (57, 26, 'Psychological Perspectives', 'Psychology', 3, 'Fall'),
-        (58, 26, 'Cognitive Psychology', 'Psychology', 4, 'Spring'),
-        (59, 36, 'Creative Writing Techniques', 'Creative Writing', 4, 'Fall'),
-        (60, 36, 'Screenwriting Fundamentals', 'Creative Writing', 4, 'Spring'),
-        (61, 41, 'Political Theory', 'Political Science', 4, 'Fall'),
-        (62, 41, 'Public Policy Analysis', 'Political Science', 4, 'Spring'),
-        (63, 46, 'Economic Theory', 'Economics', 4, 'Fall'),
-        (64, 46, 'Global Economy and Markets', 'Economics', 4, 'Spring'),
-        (65, 31, 'Philosophy of Science', 'Philosophy', 3, 'Fall'),
-        (66, 31, 'Ethics and Morality', 'Philosophy', 3, 'Spring'),
-        (67, 3, 'Sustainable Engineering Practices',
-         'Environmental Engineering', 4, 'Fall'),
-        (68, 3, 'Water Resources Engineering',
-         'Environmental Engineering', 4, 'Spring'),
-        (69, 9, 'Structural Dynamics in Civil Engineering',
-         'Civil Engineering', 4, 'Fall'),
-        (70, 9, 'Geotechnical Engineering Principles',
-         'Civil Engineering', 4, 'Spring'),
-        (71, 14, 'Renewable Energy Technologies',
-         'Renewable Energy Engineering', 4, 'Fall'),
-        (72, 14, 'Energy Systems and Sustainability',
-         'Renewable Energy Engineering', 4, 'Spring'),
-        (73, 19, 'Aerospace Propulsion Systems',
-         'Aerospace Engineering', 4, 'Fall'),
-        (74, 19, 'Flight Mechanics and Control',
-         'Aerospace Engineering', 4, 'Spring'),
-        (75, 25, 'Thermodynamics in Mechanical Engineering',
-         'Mechanical Engineering', 4, 'Fall'),
-        (76, 25, 'Fluid Mechanics and Dynamics',
-         'Mechanical Engineering', 4, 'Spring'),
-        (77, 30, 'Electrical Circuits and Systems',
-         'Electrical Engineering', 4, 'Fall'),
-        (78, 30, 'Digital Signal Processing',
-         'Electrical Engineering', 4, 'Spring'),
-        (79, 35, 'Computer Systems Architecture',
-         'Computer Engineering', 4, 'Fall'),
-        (80, 35, 'Embedded Systems Design', 'Computer Engineering', 4, 'Spring'),
+        (51, 4, 'Global Political Systems', 'Art History', 4, 'Fall'),
+        (52, 4, 'International Relations Theory', 'International Law', 4, 'Spring'),
+        (53, 10, 'Literary Analysis and Criticism', 'Art History', 3, 'Fall'),
+        (54, 10, 'Contemporary World Literature', 'Art History', 3, 'Spring'),
+        # (55, 20, 'Sociological Theories', 'Sociology', 3, 'Fall'),
+        # (56, 20, 'Social Research Methods', 'Sociology', 4, 'Spring'),
+        # (57, 26, 'Psychological Perspectives', 'Psychology', 3, 'Fall'),
+        # (58, 26, 'Cognitive Psychology', 'Psychology', 4, 'Spring'),
+        # (59, 36, 'Creative Writing Techniques', 'Creative Writing', 4, 'Fall'),
+        # (60, 36, 'Screenwriting Fundamentals', 'Creative Writing', 4, 'Spring'),
+        # (61, 41, 'Political Theory', 'Political Science', 4, 'Fall'),
+        # (62, 41, 'Public Policy Analysis', 'Political Science', 4, 'Spring'),
+        # (63, 46, 'Economic Theory', 'Economics', 4, 'Fall'),
+        # (64, 46, 'Global Economy and Markets', 'Economics', 4, 'Spring'),
+        # (65, 31, 'Philosophy of Science', 'Philosophy', 3, 'Fall'),
+        # (66, 31, 'Ethics and Morality', 'Philosophy', 3, 'Spring'),
+        # (67, 3, 'Sustainable Engineering Practices', 'Sustainable Architecture', 4, 'Fall'),
+        # (68, 3, 'Water Resources Engineering', 'Sustainable Architecture', 4, 'Spring'),
+        # (69, 9, 'Structural Dynamics in Civil Engineering', 'Structural Engineering', 4, 'Fall'),
+        # (70, 9, 'Geotechnical Engineering Principles', 'Structural Engineering', 4, 'Spring'),
+        # (71, 14, 'Renewable Energy Technologies', 'Sustainable Architecture', 4, 'Fall'),
+        # (72, 14, 'Energy Systems and Sustainability', 'Sustainable Architecture', 4, 'Spring'),
+        # (73, 19, 'Aerospace Propulsion Systems', 'Architectural Design', 4, 'Fall'),
+        # (74, 19, 'Flight Mechanics and Control', 'Architectural Design', 4, 'Spring'),
+        # (75, 25, 'Thermodynamics in Mechanical Engineering', 'Architectural Design', 4, 'Fall'),
+        # (76, 25, 'Fluid Mechanics and Dynamics', 'Architectural Design', 4, 'Spring'),
+        # (77, 30, 'Electrical Circuits and Systems', 'Urban Planning', 4, 'Fall'),
+        # (78, 30, 'Digital Signal Processing', 'Urban Planning', 4, 'Spring'),
+        # (79, 35, 'Computer Systems Architecture', 'Urban Planning', 4, 'Fall'),
+        # (80, 35, 'Embedded Systems Design', 'Urban Planning', 4, 'Spring'),
     ]
 
     cursor = connection.cursor()
@@ -1120,50 +1081,117 @@ def generate_and_insert_modules():
     connection.commit()
     print(f"Inserted {len(modules_list)} records into the Modules table.")
 
+# CHECK AGAIN I AM NOT SURE IF DATA ARE CORRECT. MAKE SURE TO MATCH STUDENTS WITH MODULES 
+# ALSO ACCORDING TO WHAT THEY HAVE SIGNED UP TO? 
+# NEEDS FIXING
+def generate_and_insert_student_module_participation(connection, num):
+    student_module_participations = []
+    module_id_range = list(range(1, 40))  # Example range, adjust based on your data
+    student_id_range = list(range(1, 50))  # Example range, adjust based on your data
+
+    for i in range(num):
+        module_id = random.choice(module_id_range)
+        student_id = random.choice(student_id_range)
+
+        student_module_participation = (
+            i,  # experience_id
+            module_id,
+            student_id,
+        )
+        student_module_participations.append(student_module_participation)
+
+    cursor = connection.cursor()
+    insert_query = """
+    INSERT INTO StudentModuleParticipation 
+    (stud_mod_id, module_id, student_id) 
+    VALUES (%s, %s, %s)
+    """
+
+    try:
+        cursor.executemany(insert_query, student_module_participations)
+        connection.commit()
+        print(f"Inserted {len(student_module_participation)} records into the StudentModuleParticipation table.")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+
 
 bachelor_program_term_ids = [
-    4, 10, 14, 20, 24, 30, 34, 40, 44, 50,
-    54, 60, 64, 70, 74, 80, 84, 90, 94, 100,
-    104, 110, 114, 119, 124, 130, 135, 140, 145, 150,
-    155, 156, 157, 158, 159, 160, 161, 162, 163, 164,
-    165, 166, 167, 168, 169, 170, 171, 172, 173, 174,
-    175, 176, 177, 178, 179, 180, 181, 182
+4, 10, 14, 20, 24, 30, 34, 40, 44, 50,
+54, 60, 64, 70, 74, 80, 84, 90, 94, 100,
+104, 110, 114, 119, 124, 130, 135, 140, 145, 150,
+155, 156, 157, 158, 159, 160, 161, 162, 163, 164,
+165, 166, 167, 168, 169, 170, 171, 172, 173, 174,
+175, 176, 177, 178, 179, 180, 181, 182
 ]
 
-master_program_term_ids = []
+master_program_term_ids = [
+    1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 101, 111,
+    2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 112,
+    5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 105,
+    7, 17, 27, 37, 47, 57, 67, 77, 87, 97, 107,
+    8, 18, 28, 38, 48, 58, 68, 78, 88, 98, 108,
+    115, 117, 120, 122, 125, 127, 128, 131, 133, 136, 138, 141, 143, 146, 148, 151, 153, 154
+]
 
-# ENROLLS STUDENTS ONLY FOR BACHELOR DEGREES AND NONE RELATED TO UNIPI
+phd_program_term_ids = [
+    3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113,
+    9, 19, 29, 39, 49, 59, 69, 79, 89, 99, 109,
+    118, 123, 129, 134, 139, 144, 149
+]
 
+# check again if students involved with unipi. check if no errors 
+def generate_and_insert_enrollments(connection, num):
 
-def generate_and_insert_enrollments(num):
     enrollments = []
+    enrollment_id_counter = 1  # Start the counter for enrollment IDs
 
-    # Generate fake data
-    for i in range(1, num + 1):
-        student_id = fake.unique.random_int(min=1, max=100)
-        bachelor_program_id = random.choice(bachelor_program_term_ids)
-        registration_date = fake.date_between(
-            start_date="-2y", end_date="today")
+    # Generate enrollments for Bachelor programs
+    for _ in range(num):
+        student_id = fake.unique.random_int(min=1, max=200)
+        program_term_id = random.choice(bachelor_program_term_ids)
+        registration_date = fake.date_between(start_date="-2y", end_date="today")
 
-        # Add enrollment for bachelor program
         enrollment = (
-            i,                        # enrollment_id
-            student_id,               # student_id
-            bachelor_program_id,      # program_term_id
-            registration_date,        # registration_date
+            enrollment_id_counter,
+            student_id,
+            program_term_id,
+            registration_date,
         )
         enrollments.append(enrollment)
+        enrollment_id_counter += 1  # Increment the enrollment ID for the next record
 
-        # Optionally enroll in master programs
-        # for _ in range(random.randint(1, 3)):  # Assuming 1 to 3 master programs
-        #     master_program_id = random.choice(master_program_term_ids)
-        #     enrollment = (
-        #         i,                    # enrollment_id
-        #         student_id,           # student_id
-        #         master_program_id,    # program_term_id
-        #         registration_date,    # registration_date
-        #     )
-        #     enrollments.append(enrollment)
+    # Selecting half of the students for Master's programs
+    selected_student_ids_for_masters = random.sample([e[1] for e in enrollments], len(enrollments) // 2)
+    for student_id in selected_student_ids_for_masters:
+        program_term_id = random.choice(master_program_term_ids)
+        registration_date = fake.date_between(start_date="-2y", end_date="today")
+        
+        enrollment = (
+            enrollment_id_counter,
+            student_id,
+            program_term_id,
+            registration_date,
+        )
+        enrollments.append(enrollment)
+        enrollment_id_counter += 1
+
+    # Selecting half of the Master's students for Ph.D. programs
+    selected_student_ids_for_phd = random.sample(selected_student_ids_for_masters, len(selected_student_ids_for_masters) // 2)
+    for student_id in selected_student_ids_for_phd:
+        program_term_id = random.choice(phd_program_term_ids)
+        registration_date = fake.date_between(start_date="-2y", end_date="today")
+        
+        enrollment = (
+            enrollment_id_counter,
+            student_id,
+            program_term_id,
+            registration_date,
+        )
+        enrollments.append(enrollment)
+        enrollment_id_counter += 1
+
 
     # Create a cursor object
     cursor = connection.cursor()
@@ -1181,13 +1209,13 @@ def generate_and_insert_enrollments(num):
     finally:
         cursor.close()
 
-
-def generate_and_insert_companies(num_companies):
+# Working perfect 
+def generate_and_insert_companies(connection, num):
     cursor = connection.cursor()
 
     companies = []
 
-    for i in range(1, num_companies + 1):
+    for i in range(1, num + 1):
         company = (
             i,                           # company_id
             fake.company(),               # company_name
@@ -1211,13 +1239,13 @@ def generate_and_insert_companies(num_companies):
     finally:
         cursor.close()
 
-
-def generate_and_insert_job_titles(num_job_titles):
+# Working perfect 
+def generate_and_insert_job_titles(connection, num):
     cursor = connection.cursor()
 
     job_titles = []
 
-    for i in range(1, num_job_titles + 1):
+    for i in range(1, num + 1):
         job_title = (
             i,  # title_id
             fake.job(),  # title_name
@@ -1239,119 +1267,92 @@ def generate_and_insert_job_titles(num_job_titles):
     finally:
         cursor.close()
 
+# Working perfect 
+def generate_and_insert_graduations(connection, num):
+    graduations = []
+    location_id_range = list(range(1, 100))  # Assuming you have 99 possible locations
 
-##### ALL THESE WORK ######
-# generate_and_insert_locations(100)
-# generate_and_insert_students(100)
-# location_ids = generate_and_insert_locations(100)
-# generate_and_insert_universities(10, location_ids)
-# generate_and_insert_educationLevel()
-# generate_and_insert_degree()
-# generate_and_insert_faculties()
-# generate_and_insert_Program()
-# generate_and_insert_Programterm()
-# generate_and_insert_modules()
-# generate_and_insert_enrollments(100)
-# generate_and_insert_companies(10)
-# generate_and_insert_job_titles(10)
+    # Generate graduation data based on enrollment ids
+    for enrollment_id in range(1, num + 1):
+        final_grade = random.randint(60, 100)  # Assume grade range is 60 to 100
+        graduation_date = fake.date_between(start_date="today", end_date="+4y")
+        top_of_class = random.choice([True, False])
+        location_id = random.choice(location_id_range)
+
+        graduation = (
+            enrollment_id,             
+            enrollment_id,              
+            final_grade,                
+            graduation_date,            
+            top_of_class,               
+            location_id,                
+        )
+        graduations.append(graduation)
+
+    cursor = connection.cursor()
+    insert_query = """
+    INSERT INTO Graduation 
+    (graduation_id, enrollment_id, final_grade, graduation_date, top_of_class, location_id) 
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+
+    try:
+        cursor.executemany(insert_query, graduations)
+        connection.commit()
+        print(f"Inserted {len(graduations)} records into the Graduation table.")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
+
+# Working but fix the ranges here to be real.
+def generate_and_insert_work_experiences(connection, num):
+    work_experiences = []
+    student_id_range = list(range(1, 101))  # Example range, adjust based on your data
+    company_id_range = list(range(1, 30))  # Example range, adjust based on your data
+    job_title_id_range = list(range(1, 21))  # Example range, adjust based on your data
+    job_category_choices = ['SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting']
+
+    for i, _ in enumerate(range(num), start=1):
+        student_id = random.choice(student_id_range)
+        company_id = random.choice(company_id_range)
+        job_title_id = random.choice(job_title_id_range)
+        job_category = random.choice(job_category_choices)
+        start_date = fake.date_between(start_date="-5y", end_date="today")
+        end_date = fake.date_between(start_date=start_date, end_date="+2y")
+        description = fake.sentence(nb_words=10)
+        responsibilities = fake.sentence(nb_words=15)
+
+        # Append the counter 'i' as experience_id
+        work_experience = (
+            i,                         # Counter for experience_id
+            student_id,               
+            company_id,               
+            job_title_id,            
+            job_category,             
+            start_date,               
+            end_date,                
+            description,              
+            responsibilities,         
+        )
+        work_experiences.append(work_experience)
+
+    # Assuming 'connection' is your MySQL database connection
+    cursor = connection.cursor()
+    insert_query = """
+    INSERT INTO WorkExperience 
+    (experience_id, student_id, company_id, job_title_id, job_category, start_date, end_date, description, responsibilities) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+
+    try:
+        cursor.executemany(insert_query, work_experiences)
+        connection.commit()
+        print(f"Inserted {len(work_experiences)} records into the Work Experience table.")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+    finally:
+        cursor.close()
 
 
-##### NOT TESTED YET ######
-# def generate_and_insert_student_module_results()
 
-
-##### TESTING ######
-
-
-def generate_and_insert_student_graduation():
-    location_id_range = range(1, 11)  # Example: 1 to 10
-
-    def generate_and_insert_graduations(num_enrollments):
-        graduations = []
-
-        # Generate graduation data based on enrollment ids
-        for enrollment_id in range(1, num_enrollments + 1):
-            final_grade = random.randint(60, 100)  # Example grade range
-            graduation_date = fake.date_between(
-                start_date="today", end_date="+4y")
-            top_of_class = random.choice([True, False])
-            location_id = random.choice(location_id_range)
-
-            graduation = (
-                # graduation_id (assuming it's the same as enrollment_id for simplicity)
-                enrollment_id,
-                enrollment_id,              # enrollment_id
-                final_grade,                # final_grade
-                graduation_date,            # graduation_date
-                top_of_class,               # top_of_class
-                location_id,                # location_id
-            )
-            graduations.append(graduation)
-
-        # Create a cursor object
-        cursor = connection.cursor()
-
-        # SQL query for inserting data
-        insert_query = """
-        INSERT INTO Graduation 
-        (graduation_id, enrollment_id, final_grade, graduation_date, top_of_class, location_id) 
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """
-
-        try:
-            cursor.executemany(insert_query, graduations)
-            connection.commit()
-            print(
-                f"Inserted {len(graduations)} records into the Graduation table.")
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-        finally:
-            cursor.close()
-
-
-# def generate_and_insert_work_experience(num_records):
-#     work_experiences = []
-
-#     # Generate fake data
-#     for i in range(1, num_records + 1):
-#         student_id = random.choice(student_ids)
-#         company_id = random.choice(company_ids)
-#         job_title_id = random.choice(job_title_ids)
-#         job_category = random.choice(job_categories)
-#         start_date = fake.date_between(start_date="-5y", end_date="-1y")
-#         end_date = start_date + \
-#             timedelta(days=random.randint(150, 365))  # Random duration
-#         description = fake.sentence(nb_words=6)
-#         responsibilities = fake.sentence(nb_words=6)
-
-#         work_experience = (
-#             i,                          # experience_id
-#             student_id,                 # student_id
-#             company_id,                 # company_id
-#             job_title_id,               # job_title_id
-#             job_category,               # job_category
-#             start_date,                 # start_date
-#             end_date,                   # end_date
-#             description,                # description
-#             responsibilities,           # responsibilities
-#         )
-#         work_experiences.append(work_experience)
-#     # Create a cursor object
-#     cursor = connection.cursor()
-#     # SQL query for inserting data
-#     insert_query = """
-#     INSERT INTO WorkExperience
-#     (experience_id, student_id, company_id, job_title_id, job_category, start_date, end_date, description, responsibilities)
-#     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-#     """
-#     try:
-#         cursor.executemany(insert_query, work_experiences)
-#         connection.commit()
-#         print(
-#             f"Inserted {len(work_experiences)} records into the WorkExperience table.")
-#     except mysql.connector.Error as err:
-#         print(f"Error: {err}")
-#     finally:
-#         cursor.close()
-# Close the connection
-connection.close()
