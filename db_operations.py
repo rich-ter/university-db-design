@@ -3,6 +3,7 @@ from mysql.connector import connect, Error
 import mysql.connector
 from faker import Faker
 import random
+from datetime import timedelta, datetime
 
 fake = Faker('el_GR')  # Set the locale to Greek (Greece)
 
@@ -631,335 +632,167 @@ def generate_and_insert_Program(connection):
     print(
         f"Inserted {len(programs_list)} records into the Program table.")
 
-# Most prob checkk again
+# Working perfect 
 def generate_and_insert_Programterm(connection):
-
-    program_terms = [
-        (1, 1, '2023-01-01', '2023-12-31', 100,
-         '2023 cohort for Masters in Advanced Information Systems'),
-        (2, 2, '2023-09-01', '2024-05-31', 80,
-         'Fall 2023 cohort for Masters in Business Analytics'),
-        (3, 3, '2023-09-01', '2027-05-31', 50,
-         '2023 cohort for Ph.D. in Environmental Engineering Research'),
-        (4, 4, '2023-09-01', '2026-05-31', 120,
-         '2023 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (5, 5, '2023-09-01', '2024-05-31', 75,
-         'Fall 2023 cohort for Master of Law in Intellectual Property'),
-        (6, 6, '2023-01-01', '2023-12-31', 60,
-         '2023 cohort for Associate Degree in Business and Finance'),
-        (7, 7, '2023-09-01', '2024-05-31', 85,
-         'Fall 2023 cohort for Masters in Technology Management'),
-        (8, 8, '2023-01-01', '2023-12-31', 90,
-         '2023 cohort for Masters in Marketing Analytics'),
-        (9, 9, '2023-09-01', '2027-05-31', 40,
-         '2023 cohort for Ph.D. in Civil Engineering Structures'),
-        (10, 10, '2023-09-01', '2026-05-31', 110,
-         '2023 cohort for Bachelor of Arts in English Literature'),
-        (11, 1, '2024-01-01', '2024-12-31', 100,
-         '2024 cohort for Masters in Advanced Information Systems'),
-        (12, 2, '2024-09-01', '2025-05-31', 80,
-         'Fall 2024 cohort for Masters in Business Analytics'),
-        (13, 3, '2024-09-01', '2028-05-31', 50,
-         '2024 cohort for Ph.D. in Environmental Engineering Research'),
-        (14, 4, '2024-09-01', '2027-05-31', 120,
-         '2024 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (15, 5, '2024-09-01', '2025-05-31', 75,
-         'Fall 2024 cohort for Master of Law in Intellectual Property'),
-        (16, 6, '2024-01-01', '2024-12-31', 60,
-         '2024 cohort for Associate Degree in Business and Finance'),
-        (17, 7, '2024-09-01', '2025-05-31', 85,
-         'Fall 2024 cohort for Masters in Technology Management'),
-        (18, 8, '2024-01-01', '2024-12-31', 90,
-         '2024 cohort for Masters in Marketing Analytics'),
-        (19, 9, '2024-09-01', '2028-05-31', 40,
-         '2024 cohort for Ph.D. in Civil Engineering Structures'),
-        (20, 10, '2024-09-01', '2027-05-31', 110,
-         '2024 cohort for Bachelor of Arts in English Literature'),
-        (21, 1, '2025-01-01', '2025-12-31', 100,
-         '2025 cohort for Masters in Advanced Information Systems'),
-        (22, 2, '2025-09-01', '2026-05-31', 80,
-         'Fall 2025 cohort for Masters in Business Analytics'),
-        (23, 3, '2025-09-01', '2029-05-31', 50,
-         '2025 cohort for Ph.D. in Environmental Engineering Research'),
-        (24, 4, '2025-09-01', '2028-05-31', 120,
-         '2025 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (25, 5, '2025-09-01', '2026-05-31', 75,
-         'Fall 2025 cohort for Master of Law in Intellectual Property'),
-        (26, 6, '2025-01-01', '2025-12-31', 60,
-         '2025 cohort for Associate Degree in Business and Finance'),
-        (27, 7, '2025-09-01', '2026-05-31', 85,
-         'Fall 2025 cohort for Masters in Technology Management'),
-        (28, 8, '2025-01-01', '2025-12-31', 90,
-         '2025 cohort for Masters in Marketing Analytics'),
-        (29, 9, '2026-09-01', '2030-05-31', 40,
-         '2026 cohort for Ph.D. in Civil Engineering Structures'),
-        (30, 10, '2026-09-01', '2030-05-31', 110,
-         '2026 cohort for Bachelor of Arts in English Literature'),
-        (31, 1, '2026-01-01', '2026-12-31', 100,
-         '2026 cohort for Masters in Advanced Information Systems'),
-        (32, 2, '2026-09-01', '2027-05-31', 80,
-         'Fall 2026 cohort for Masters in Business Analytics'),
-        (33, 3, '2026-09-01', '2030-05-31', 50,
-         '2026 cohort for Ph.D. in Environmental Engineering Research'),
-        (34, 4, '2026-09-01', '2029-05-31', 120,
-         '2026 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (35, 5, '2026-09-01', '2027-05-31', 75,
-         'Fall 2026 cohort for Master of Law in Intellectual Property'),
-        (36, 6, '2026-01-01', '2026-12-31', 60,
-         '2026 cohort for Associate Degree in Business and Finance'),
-        (37, 7, '2026-09-01', '2027-05-31', 85,
-         'Fall 2026 cohort for Masters in Technology Management'),
-        (38, 8, '2026-01-01', '2026-12-31', 90,
-         '2026 cohort for Masters in Marketing Analytics'),
-        (39, 9, '2027-09-01', '2031-05-31', 40,
-         '2027 cohort for Ph.D. in Civil Engineering Structures'),
-        (40, 10, '2027-09-01', '2031-05-31', 110,
-         '2027 cohort for Bachelor of Arts in English Literature'),
-        (41, 1, '2027-01-01', '2027-12-31', 100,
-         '2027 cohort for Masters in Advanced Information Systems'),
-        (42, 2, '2027-09-01', '2028-05-31', 80,
-         'Fall 2027 cohort for Masters in Business Analytics'),
-        (43, 3, '2027-09-01', '2031-05-31', 50,
-         '2027 cohort for Ph.D. in Environmental Engineering Research'),
-        (44, 4, '2027-09-01', '2030-05-31', 120,
-         '2027 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (45, 5, '2027-09-01', '2028-05-31', 75,
-         'Fall 2027 cohort for Master of Law in Intellectual Property'),
-        (46, 6, '2027-01-01', '2027-12-31', 60,
-         '2027 cohort for Associate Degree in Business and Finance'),
-        (47, 7, '2027-09-01', '2028-05-31', 85,
-         'Fall 2027 cohort for Masters in Technology Management'),
-        (48, 8, '2027-01-01', '2027-12-31', 90,
-         '2027 cohort for Masters in Marketing Analytics'),
-        (49, 9, '2028-09-01', '2032-05-31', 40,
-         '2028 cohort for Ph.D. in Civil Engineering Structures'),
-        (50, 10, '2028-09-01', '2032-05-31', 110,
-         '2028 cohort for Bachelor of Arts in English Literature'),
-        (51, 1, '2028-01-01', '2028-12-31', 100,
-         '2028 cohort for Masters in Advanced Information Systems'),
-        (52, 2, '2028-09-01', '2029-05-31', 80,
-         'Fall 2028 cohort for Masters in Business Analytics'),
-        (53, 3, '2028-09-01', '2032-05-31', 50,
-         '2028 cohort for Ph.D. in Environmental Engineering Research'),
-        (54, 4, '2028-09-01', '2031-05-31', 120,
-         '2028 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (55, 5, '2028-09-01', '2029-05-31', 75,
-         'Fall 2028 cohort for Master of Law in Intellectual Property'),
-        (56, 6, '2028-01-01', '2028-12-31', 60,
-         '2028 cohort for Associate Degree in Business and Finance'),
-        (57, 7, '2028-09-01', '2029-05-31', 85,
-         'Fall 2028 cohort for Masters in Technology Management'),
-        (58, 8, '2028-01-01', '2028-12-31', 90,
-         '2028 cohort for Masters in Marketing Analytics'),
-        (59, 9, '2029-09-01', '2033-05-31', 40,
-         '2029 cohort for Ph.D. in Civil Engineering Structures'),
-        (60, 10, '2029-09-01', '2033-05-31', 110,
-         '2029 cohort for Bachelor of Arts in English Literature'),
-        (61, 1, '2029-01-01', '2029-12-31', 100,
-         '2029 cohort for Masters in Advanced Information Systems'),
-        (62, 2, '2029-09-01', '2030-05-31', 80,
-         'Fall 2029 cohort for Masters in Business Analytics'),
-        (63, 3, '2029-09-01', '2033-05-31', 50,
-         '2029 cohort for Ph.D. in Environmental Engineering Research'),
-        (64, 4, '2029-09-01', '2032-05-31', 120,
-         '2029 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (65, 5, '2029-09-01', '2030-05-31', 75,
-         'Fall 2029 cohort for Master of Law in Intellectual Property'),
-        (66, 6, '2029-01-01', '2029-12-31', 60,
-         '2029 cohort for Associate Degree in Business and Finance'),
-        (67, 7, '2029-09-01', '2030-05-31', 85,
-         'Fall 2029 cohort for Masters in Technology Management'),
-        (68, 8, '2029-01-01', '2029-12-31', 90,
-         '2029 cohort for Masters in Marketing Analytics'),
-        (69, 9, '2030-09-01', '2034-05-31', 40,
-         '2030 cohort for Ph.D. in Civil Engineering Structures'),
-        (70, 10, '2030-09-01', '2034-05-31', 110,
-         '2030 cohort for Bachelor of Arts in English Literature'),
-        (71, 1, '2030-01-01', '2030-12-31', 100,
-         '2030 cohort for Masters in Advanced Information Systems'),
-        (72, 2, '2030-09-01', '2031-05-31', 80,
-         'Fall 2030 cohort for Masters in Business Analytics'),
-        (73, 3, '2030-09-01', '2034-05-31', 50,
-         '2030 cohort for Ph.D. in Environmental Engineering Research'),
-        (74, 4, '2030-09-01', '2033-05-31', 120,
-         '2030 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (75, 5, '2030-09-01', '2031-05-31', 75,
-         'Fall 2030 cohort for Master of Law in Intellectual Property'),
-        (76, 6, '2030-01-01', '2030-12-31', 60,
-         '2030 cohort for Associate Degree in Business and Finance'),
-        (77, 7, '2030-09-01', '2031-05-31', 85,
-         'Fall 2030 cohort for Masters in Technology Management'),
-        (78, 8, '2030-01-01', '2030-12-31', 90,
-         '2030 cohort for Masters in Marketing Analytics'),
-        (79, 9, '2031-09-01', '2035-05-31', 40,
-         '2031 cohort for Ph.D. in Civil Engineering Structures'),
-        (80, 10, '2031-09-01', '2035-05-31', 110,
-         '2031 cohort for Bachelor of Arts in English Literature'),
-        (81, 1, '2031-01-01', '2031-12-31', 100,
-         '2031 cohort for Masters in Advanced Information Systems'),
-        (82, 2, '2031-09-01', '2032-05-31', 80,
-         'Fall 2031 cohort for Masters in Business Analytics'),
-        (83, 3, '2031-09-01', '2035-05-31', 50,
-         '2031 cohort for Ph.D. in Environmental Engineering Research'),
-        (84, 4, '2031-09-01', '2034-05-31', 120,
-         '2031 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (85, 5, '2031-09-01', '2032-05-31', 75,
-         'Fall 2031 cohort for Master of Law in Intellectual Property'),
-        (86, 6, '2031-01-01', '2031-12-31', 60,
-         '2031 cohort for Associate Degree in Business and Finance'),
-        (87, 7, '2031-09-01', '2032-05-31', 85,
-         'Fall 2031 cohort for Masters in Technology Management'),
-        (88, 8, '2031-01-01', '2031-12-31', 90,
-         '2031 cohort for Masters in Marketing Analytics'),
-        (89, 9, '2032-09-01', '2036-05-31', 40,
-         '2032 cohort for Ph.D. in Civil Engineering Structures'),
-        (90, 10, '2032-09-01', '2036-05-31', 110,
-         '2032 cohort for Bachelor of Arts in English Literature'),
-        (91, 1, '2032-01-01', '2032-12-31', 100,
-         '2032 cohort for Masters in Advanced Information Systems'),
-        (92, 2, '2032-09-01', '2033-05-31', 80,
-         'Fall 2032 cohort for Masters in Business Analytics'),
-        (93, 3, '2032-09-01', '2036-05-31', 50,
-         '2032 cohort for Ph.D. in Environmental Engineering Research'),
-        (94, 4, '2032-09-01', '2035-05-31', 120,
-         '2032 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (95, 5, '2032-09-01', '2033-05-31', 75,
-         'Fall 2032 cohort for Master of Law in Intellectual Property'),
-        (96, 6, '2032-01-01', '2032-12-31', 60,
-         '2032 cohort for Associate Degree in Business and Finance'),
-        (97, 7, '2032-09-01', '2033-05-31', 85,
-         'Fall 2032 cohort for Masters in Technology Management'),
-        (98, 8, '2032-01-01', '2032-12-31', 90,
-         '2032 cohort for Masters in Marketing Analytics'),
-        (99, 9, '2032-09-01', '2036-05-31', 40,
-         '2032 cohort for Ph.D. in Civil Engineering Structures'),
-        (100, 10, '2032-09-01', '2036-05-31', 110,
-         '2032 cohort for Bachelor of Arts in English Literature'),
-        (101, 1, '2033-01-01', '2033-12-31', 100,
-         '2033 cohort for Masters in Advanced Information Systems'),
-        (102, 2, '2033-09-01', '2034-05-31', 80,
-         'Fall 2033 cohort for Masters in Business Analytics'),
-        (103, 3, '2033-09-01', '2037-05-31', 50,
-         '2033 cohort for Ph.D. in Environmental Engineering Research'),
-        (104, 4, '2033-09-01', '2037-05-31', 120,
-         '2033 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (105, 5, '2033-09-01', '2034-05-31', 75,
-         'Fall 2033 cohort for Master of Law in Intellectual Property'),
-        (106, 6, '2033-01-01', '2033-12-31', 60,
-         '2033 cohort for Associate Degree in Business and Finance'),
-        (107, 7, '2033-09-01', '2034-05-31', 85,
-         'Fall 2033 cohort for Masters in Technology Management'),
-        (108, 8, '2033-01-01', '2033-12-31', 90,
-         '2033 cohort for Masters in Marketing Analytics'),
-        (109, 9, '2033-09-01', '2037-05-31', 40,
-         '2033 cohort for Ph.D. in Civil Engineering Structures'),
-        (110, 10, '2033-09-01', '2037-05-31', 110,
-         '2033 cohort for Bachelor of Arts in English Literature'),
-        (111, 1, '2034-01-01', '2034-12-31', 100,
-         '2034 cohort for Masters in Advanced Information Systems'),
-        (112, 2, '2034-09-01', '2035-05-31', 80,
-         'Fall 2034 cohort for Masters in Business Analytics'),
-        (113, 3, '2034-09-01', '2038-05-31', 50,
-         '2034 cohort for Ph.D. in Environmental Engineering Research'),
-        (114, 4, '2034-09-01', '2038-05-31', 120,
-         '2034 cohort for Bachelor of Arts in Political Science and International Relations'),
-        (115, 11, '2034-09-01', '2038-05-31',
-         75, 'Fall 2034 cohort for Program 11'),
-        (116, 12, '2034-01-01', '2034-12-31', 60, '2034 cohort for Program 12'),
-        (117, 13, '2034-09-01', '2035-05-31',
-         85, 'Fall 2034 cohort for Program 13'),
-        (118, 14, '2034-01-01', '2034-12-31', 90, '2034 cohort for Program 14'),
-        (119, 15, '2034-09-01', '2038-05-31', 40, '2034 cohort for Program 15'),
-        (120, 16, '2034-09-01', '2038-05-31', 110, '2034 cohort for Program 16'),
-        (121, 17, '2035-01-01', '2035-12-31', 100, '2035 cohort for Program 17'),
-        (122, 18, '2035-09-01', '2036-05-31',
-         80, 'Fall 2035 cohort for Program 18'),
-        (123, 19, '2035-09-01', '2039-05-31', 50, '2035 cohort for Program 19'),
-        (124, 20, '2035-09-01', '2039-05-31', 120, '2035 cohort for Program 20'),
-        (125, 21, '2035-09-01', '2036-05-31',
-         75, 'Fall 2035 cohort for Program 21'),
-        (126, 22, '2035-01-01', '2035-12-31', 60, '2035 cohort for Program 22'),
-        (127, 23, '2035-09-01', '2036-05-31',
-         85, 'Fall 2035 cohort for Program 23'),
-        (128, 24, '2035-01-01', '2035-12-31', 90, '2035 cohort for Program 24'),
-        (129, 25, '2035-09-01', '2039-05-31', 40, '2035 cohort for Program 25'),
-        (130, 26, '2035-09-01', '2039-05-31', 110, '2035 cohort for Program 26'),
-        (131, 27, '2036-01-01', '2036-12-31', 100, '2036 cohort for Program 27'),
-        (132, 28, '2036-09-01', '2037-05-31',
-         80, 'Fall 2036 cohort for Program 28'),
-        (133, 29, '2036-09-01', '2040-05-31', 50, '2036 cohort for Program 29'),
-        (134, 30, '2036-09-01', '2040-05-31', 120, '2036 cohort for Program 30'),
-        (135, 31, '2036-09-01', '2040-05-31', 75, '2036 cohort for Program 31'),
-        (136, 32, '2036-01-01', '2036-12-31', 60, '2036 cohort for Program 32'),
-        (137, 33, '2036-09-01', '2037-05-31',
-         85, 'Fall 2036 cohort for Program 33'),
-        (138, 34, '2036-01-01', '2036-12-31', 90, '2036 cohort for Program 34'),
-        (139, 35, '2036-09-01', '2040-05-31', 40, '2036 cohort for Program 35'),
-        (140, 36, '2036-09-01', '2040-05-31', 110, '2036 cohort for Program 36'),
-        (141, 37, '2037-01-01', '2037-12-31', 100, '2037 cohort for Program 37'),
-        (142, 38, '2037-09-01', '2038-05-31',
-         80, 'Fall 2037 cohort for Program 38'),
-        (143, 39, '2037-09-01', '2041-05-31', 50, '2037 cohort for Program 39'),
-        (144, 40, '2037-09-01', '2041-05-31', 120, '2037 cohort for Program 40'),
-        (145, 41, '2037-09-01', '2038-05-31',
-         75, 'Fall 2037 cohort for Program 41'),
-        (146, 42, '2037-01-01', '2037-12-31', 60, '2037 cohort for Program 42'),
-        (147, 43, '2037-09-01', '2038-05-31',
-         85, 'Fall 2037 cohort for Program 43'),
-        (148, 44, '2037-01-01', '2037-12-31', 90, '2037 cohort for Program 44'),
-        (149, 45, '2037-09-01', '2041-05-31', 40, '2037 cohort for Program 45'),
-        (150, 46, '2037-09-01', '2041-05-31', 110, '2037 cohort for Program 46'),
-        (151, 47, '2038-01-01', '2038-12-31', 100, '2038 cohort for Program 47'),
-        (152, 48, '2038-09-01', '2039-05-31',
-         80, 'Fall 2038 cohort for Program 48'),
-        (153, 49, '2038-09-01', '2042-05-31', 50, '2038 cohort for Program 49'),
-        (154, 50, '2038-09-01', '2042-05-31', 120, '2038 cohort for Program 50'),
-        (155, 51, '2038-09-01', '2039-05-31',
-         75, 'Fall 2038 cohort for Program 51'),
-        (156, 52, '2038-01-01', '2038-12-31', 60, '2038 cohort for Program 52'),
-        (157, 53, '2038-09-01', '2039-05-31',
-         85, 'Fall 2038 cohort for Program 53'),
-        (158, 54, '2038-01-01', '2038-12-31', 90, '2038 cohort for Program 54'),
-        (159, 55, '2038-09-01', '2042-05-31', 40, '2038 cohort for Program 55'),
-        (160, 56, '2038-09-01', '2042-05-31', 110, '2038 cohort for Program 56'),
-        (161, 57, '2039-01-01', '2039-12-31', 100, '2039 cohort for Program 57'),
-        (162, 58, '2039-09-01', '2040-05-31',
-         80, 'Fall 2039 cohort for Program 58'),
-        (163, 59, '2039-09-01', '2043-05-31', 50, '2039 cohort for Program 59'),
-        (164, 60, '2039-09-01', '2043-05-31', 120, '2039 cohort for Program 60'),
-        (165, 61, '2039-09-01', '2040-05-31',
-         75, 'Fall 2039 cohort for Program 61'),
-        (166, 62, '2039-01-01', '2039-12-31', 60, '2039 cohort for Program 62'),
-        (167, 63, '2039-09-01', '2040-05-31',
-         85, 'Fall 2039 cohort for Program 63'),
-        (168, 64, '2039-01-01', '2039-12-31', 90, '2039 cohort for Program 64'),
-        (169, 65, '2039-09-01', '2043-05-31', 40, '2039 cohort for Program 65'),
-        (170, 66, '2039-09-01', '2043-05-31', 110, '2039 cohort for Program 66'),
-        (171, 67, '2040-01-01', '2040-12-31', 100, '2040 cohort for Program 67'),
-        (172, 68, '2040-09-01', '2041-05-31',
-         80, 'Fall 2040 cohort for Program 68'),
-        (173, 69, '2040-09-01', '2044-05-31', 50, '2040 cohort for Program 69'),
-        (174, 70, '2040-09-01', '2044-05-31', 120, '2040 cohort for Program 70'),
-        (175, 71, '2040-09-01', '2041-05-31',
-         75, 'Fall 2040 cohort for Program 71'),
-        (176, 72, '2040-01-01', '2040-12-31', 60, '2040 cohort for Program 72'),
-        (177, 73, '2040-09-01', '2041-05-31',
-         85, 'Fall 2040 cohort for Program 73'),
-        (178, 74, '2040-01-01', '2040-12-31', 90, '2040 cohort for Program 74'),
-        (179, 75, '2040-09-01', '2044-05-31', 40, '2040 cohort for Program 75'),
-        (180, 76, '2040-09-01', '2044-05-31', 110, '2040 cohort for Program 76'),
-        (181, 77, '2041-01-01', '2041-12-31', 100, '2041 cohort for Program 77'),
-        (182, 78, '2041-09-01', '2042-05-31',
-         80, 'Fall 2041 cohort for Program 78'),
+    bachelors_program_term_to_term = [
+        (179, 75), (174, 70), (169, 65), (160, 56), (178, 74), 
+        (173, 69), (168, 64), (164, 60), (159, 55), (182, 78), 
+        (177, 73), (172, 68), (167, 63), (163, 59), (158, 54), 
+        (180, 76), (175, 71), (170, 66), (165, 61), (161, 57), 
+        (156, 52), (155, 51), (181, 77), (176, 72), (171, 67), 
+        (166, 62), (162, 58), (157, 53), (150, 46), (145, 41), 
+        (140, 36), (135, 31), (130, 26), (124, 20), (119, 15), 
+        (10, 10), (20, 10), (30, 10), (40, 10), (50, 10), 
+        (60, 10), (70, 10), (80, 10), (90, 10), (100, 10), 
+        (110, 10), (4, 4), (14, 4), (24, 4), (34, 4), 
+        (44, 4), (54, 4), (64, 4), (74, 4), (84, 4), 
+        (94, 4), (104, 4), (114, 4)
     ]
 
-    cursor = connection.cursor()
 
-    insert_query = "INSERT INTO Program_Term (program_term_id, program_id, start_date, end_date, max_capacity, description) VALUES (%s, %s, %s, %s, %s, %s)"
-    cursor.executemany(insert_query, program_terms)
-    connection.commit()
-    print(
-        f"Inserted {len(program_terms)} records into the Program_Term table.")
+    masters_program_term_to_term = [
+        ('151', '47'), ('146', '42'), ('141', '37'), ('136', '32'), ('131', '27'), 
+        ('125', '21'), ('120', '16'), ('115', '11'), ('5', '5'), ('15', '5'), 
+        ('25', '5'), ('35', '5'), ('45', '5'), ('55', '5'), ('65', '5'), 
+        ('75', '5'), ('85', '5'), ('95', '5'), ('105', '5'), ('154', '50'), 
+        ('153', '49'), ('148', '44'), ('143', '39'), ('138', '34'), ('133', '29'), 
+        ('128', '24'), ('127', '23'), ('122', '18'), ('117', '13'), ('8', '8'), 
+        ('18', '8'), ('28', '8'), ('38', '8'), ('48', '8'), ('58', '8'), 
+        ('68', '8'), ('78', '8'), ('88', '8'), ('98', '8'), ('108', '8'), 
+        ('7', '7'), ('17', '7'), ('27', '7'), ('37', '7'), ('47', '7'), 
+        ('57', '7'), ('67', '7'), ('77', '7'), ('87', '7'), ('97', '7'), 
+        ('107', '7'), ('2', '2'), ('12', '2'), ('22', '2'), ('32', '2'), 
+        ('42', '2'), ('52', '2'), ('62', '2'), ('72', '2'), ('82', '2'), 
+        ('92', '2'), ('102', '2'), ('112', '2'), ('1', '1'), ('11', '1'), 
+        ('21', '1'), ('31', '1'), ('41', '1'), ('51', '1'), ('61', '1'), 
+        ('71', '1'), ('81', '1'), ('91', '1'), ('101', '1'), ('111', '1')
+    ]
+
+    phd_program_term_to_term = [
+        ('149', '45'), ('144', '40'), ('139', '35'), ('134', '30'), ('129', '25'), 
+        ('123', '19'), ('118', '14'), ('9', '9'), ('19', '9'), ('29', '9'), 
+        ('39', '9'), ('49', '9'), ('59', '9'), ('69', '9'), ('79', '9'), 
+        ('89', '9'), ('99', '9'), ('109', '9'), ('3', '3'), ('13', '3'), 
+        ('23', '3'), ('33', '3'), ('43', '3'), ('53', '3'), ('63', '3'), 
+        ('73', '3'), ('83', '3'), ('93', '3'), ('103', '3'), ('113', '3')
+    ]
+
+    associates_program_term_to_term = [
+    ('152', '48'),
+    ('147', '43'),
+    ('142', '38'),
+    ('137', '33'),
+    ('132', '28'),
+    ('126', '22'),
+    ('121', '17'),
+    ('116', '12'),
+    ('6', '6'),
+    ('16', '6'),
+    ('26', '6'),
+    ('36', '6'),
+    ('46', '6'),
+    ('56', '6'),
+    ('66', '6'),
+    ('76', '6'),
+    ('86', '6'),
+    ('96', '6'),
+    ('106', '6')
+    ]
+
+    
+    # Function to insert program_term_to_term pairs for Bachelor's program
+
+    def insert_bachelors_program_term_to_term(bachelors_program_term_to_term):
+        bachelor_program_terms = []
+        for program_term, program in bachelors_program_term_to_term:
+            start_date = datetime(2005, 1, 1)
+            end_date = datetime(2016, 12, 31)
+        # Generate a date between the start and end dates
+            start_date = fake.date_between_dates(date_start=start_date, date_end=end_date)
+            end_date = start_date + timedelta(days=365)  # Add one year to the start date
+            max_capacity = random.randint(20, 50)
+            description = fake.sentence()
+            
+            bachelor_program_terms.append((program_term, program, start_date, end_date, max_capacity, description))
+
+        cursor = connection.cursor()
+
+        insert_query = "INSERT INTO Program_Term (program_term_id, program_id, start_date, end_date, max_capacity, description) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.executemany(insert_query, bachelor_program_terms)
+        connection.commit()
+        print(
+        f"Inserted {len(bachelor_program_terms)} bachelors records into the Program_Term table.")
+
+
+    def insert_masters_program_term_to_term(masters_program_term_to_term):
+        masters_program_terms = []
+        for program_term, program in masters_program_term_to_term:
+            start_date = datetime(2016, 1, 1)
+            end_date = datetime(2021, 12, 31)
+        # Generate a date between the start and end dates
+            start_date = fake.date_between_dates(date_start=start_date, date_end=end_date)
+            end_date = start_date + timedelta(days=365)
+            max_capacity = random.randint(20, 50)
+            description = fake.sentence()
+            
+            masters_program_terms.append((program_term, program, start_date, end_date, max_capacity, description))
+
+        cursor = connection.cursor()
+        insert_query = "INSERT INTO Program_Term (program_term_id, program_id, start_date, end_date, max_capacity, description) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.executemany(insert_query, masters_program_terms)
+        connection.commit()
+        print(f"Inserted {len(masters_program_terms)} master's records into the Program_Term table.")
+
+    def insert_phd_program_term_to_term(phd_program_term_to_term):
+        phd_program_terms = []
+        for program_term, program in phd_program_term_to_term:
+            start_date = datetime(2022, 1, 1)
+            end_date = datetime(2023, 12, 31)
+            start_date = fake.date_between_dates(date_start=start_date, date_end=end_date)
+            end_date = start_date + timedelta(days=365)
+            max_capacity = random.randint(20, 50)
+            description = fake.sentence()
+            
+            phd_program_terms.append((program_term, program, start_date, end_date, max_capacity, description))
+
+        cursor = connection.cursor()
+        insert_query = "INSERT INTO Program_Term (program_term_id, program_id, start_date, end_date, max_capacity, description) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.executemany(insert_query, phd_program_terms)
+        connection.commit()
+        print(f"Inserted {len(phd_program_terms)} PhD records into the Program_Term table.")
+
+
+    def insert_associates_program_term_to_term(associates_program_term_to_term):
+        associates_program_terms = []
+        for program_term, program in associates_program_term_to_term:
+            # Define the start and end dates
+            start_date = datetime(2005, 1, 1)
+            end_date = datetime(2016, 12, 31)
+            # Generate a date between the start and end dates
+            start_date = fake.date_between_dates(date_start=start_date, date_end=end_date)
+            # Calculate the end date one year after the start date
+            end_date = start_date + timedelta(days=365)
+            max_capacity = random.randint(20, 50)
+            description = fake.sentence()
+            
+            associates_program_terms.append((program_term, program, start_date, end_date, max_capacity, description))
+
+        cursor = connection.cursor()
+        insert_query = "INSERT INTO Program_Term (program_term_id, program_id, start_date, end_date, max_capacity, description) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.executemany(insert_query, associates_program_terms)
+        connection.commit()
+        print(f"Inserted {len(associates_program_terms)} associates records into the Program_Term table.")
+
+    # Insert Bachelor's program term to term pairs
+    insert_bachelors_program_term_to_term(bachelors_program_term_to_term)
+    
+    # Insert Masters program term to term pairs
+    insert_masters_program_term_to_term(masters_program_term_to_term)
+    
+    # Insert PhD program term to term pairs
+    insert_phd_program_term_to_term(phd_program_term_to_term)
+
+    insert_associates_program_term_to_term(associates_program_term_to_term)
 
 # CHECK AGAIN AND ADD MORE WHEN GPT4 AVIALABLE.
 # MAKE SURE THAT THE PROGRAM_TERM_IDS MATCH THE UOP COURSES IN MOST CASES.
@@ -1118,12 +951,12 @@ def generate_and_insert_student_module_participation(connection, num):
 
 
 bachelor_program_term_ids = [
-4, 10, 14, 20, 24, 30, 34, 40, 44, 50,
-54, 60, 64, 70, 74, 80, 84, 90, 94, 100,
-104, 110, 114, 119, 124, 130, 135, 140, 145, 150,
-155, 156, 157, 158, 159, 160, 161, 162, 163, 164,
-165, 166, 167, 168, 169, 170, 171, 172, 173, 174,
-175, 176, 177, 178, 179, 180, 181, 182
+    4, 10, 14, 20, 24, 30, 34, 40, 44, 50,
+    54, 60, 64, 70, 74, 80, 84, 90, 94, 100,
+    104, 110, 114, 119, 124, 130, 135, 140, 145, 150,
+    155, 156, 157, 158, 159, 160, 161, 162, 163, 164,
+    165, 166, 167, 168, 169, 170, 171, 172, 173, 174,
+    175, 176, 177, 178, 179, 180, 181, 182
 ]
 
 master_program_term_ids = [
@@ -1141,6 +974,14 @@ phd_program_term_ids = [
     118, 123, 129, 134, 139, 144, 149
 ]
 
+program_term_related_to_uni_pi_ids = [
+    117, 126, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 112,
+    6, 16, 26, 36, 46, 56, 66, 76, 86, 96, 106, 154, 128, 1,
+    11, 21, 31, 41, 51, 61, 71, 81, 91, 101, 111, 7, 17, 27,
+    37, 47, 57, 67, 77, 87, 97, 107, 121, 127, 132, 137, 142,
+    144, 147, 149, 153, 155, 165
+]
+
 # check again if students involved with unipi. check if no errors 
 def generate_and_insert_enrollments(connection, num):
 
@@ -1149,7 +990,7 @@ def generate_and_insert_enrollments(connection, num):
 
     # Generate enrollments for Bachelor programs
     for _ in range(num):
-        student_id = fake.unique.random_int(min=1, max=200)
+        student_id = fake.random_int(min=1, max=1000)
         program_term_id = random.choice(bachelor_program_term_ids)
         registration_date = fake.date_between(start_date="-2y", end_date="today")
 
@@ -1270,7 +1111,7 @@ def generate_and_insert_job_titles(connection, num):
 # Working perfect 
 def generate_and_insert_graduations(connection, num):
     graduations = []
-    location_id_range = list(range(1, 100))  # Assuming you have 99 possible locations
+    location_id_range = list(range(1, 2000))  # Assuming you have 99 possible locations
 
     # Generate graduation data based on enrollment ids
     for enrollment_id in range(1, num + 1):
@@ -1308,7 +1149,7 @@ def generate_and_insert_graduations(connection, num):
 # Working but fix the ranges here to be real.
 def generate_and_insert_work_experiences(connection, num):
     work_experiences = []
-    student_id_range = list(range(1, 101))  # Example range, adjust based on your data
+    student_id_range = list(range(1, 1000))  # Example range, adjust based on your data
     company_id_range = list(range(1, 30))  # Example range, adjust based on your data
     job_title_id_range = list(range(1, 21))  # Example range, adjust based on your data
     job_category_choices = ['SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting']

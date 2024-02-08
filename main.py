@@ -41,39 +41,39 @@ connection = connect_to_database(host_name, user_name, user_password, database_n
 if connection is not None:
     create_database_and_tables(connection)
 
-    # num_locations = 300  
-    # generate_and_insert_locations(connection, num_locations)
+    num_locations = 2000  
+    generate_and_insert_locations(connection, num_locations)
 
-    # num_students = 200
-    # generate_and_insert_students(connection, num_students)
+    num_students = 1000
+    generate_and_insert_students(connection, num_students)
 
-    # generate_and_insert_universities(connection)
+    generate_and_insert_universities(connection)
 
-    # generate_and_insert_faculties(connection)
+    generate_and_insert_faculties(connection)
     
-    # generate_and_insert_educationLevel(connection)
+    generate_and_insert_educationLevel(connection)
 
-    # generate_and_insert_degree(connection)
+    generate_and_insert_degree(connection)
 
-    # generate_and_insert_Program(connection)
+    generate_and_insert_Program(connection)
 
-    # generate_and_insert_Programterm(connection)
+    generate_and_insert_Programterm(connection)
 
-    # generate_and_insert_modules(connection)
+    generate_and_insert_modules(connection)
 
-    # number_of_enrollments = 200
-    # generate_and_insert_enrollments(connection,number_of_enrollments)
+    number_of_enrollments = 3000
+    generate_and_insert_enrollments(connection,number_of_enrollments)
 
-    # number_of_companies = 30
-    # generate_and_insert_companies(connection,number_of_companies)
+    number_of_companies = 30
+    generate_and_insert_companies(connection,number_of_companies)
 
-    # number_of_job_titles = 40
-    # generate_and_insert_job_titles(connection, number_of_job_titles)
+    number_of_job_titles = 40
+    generate_and_insert_job_titles(connection, number_of_job_titles)
 
-    # generate_and_insert_graduations(connection, number_of_enrollments)
+    generate_and_insert_graduations(connection, number_of_enrollments)
 
-    # number_of_work_experiences = 30
-    # generate_and_insert_work_experiences(connection, number_of_work_experiences)
+    number_of_work_experiences = 30
+    generate_and_insert_work_experiences(connection, number_of_work_experiences)
 
     generate_and_insert_student_module_participation(connection, 30)
 
