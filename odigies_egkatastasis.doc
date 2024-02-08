@@ -1,0 +1,44 @@
+
+
+Step 1: activate virtual enviroment
+. venv/Scripts/activate
+
+Step 2: install dependencies
+pip install -r requirements.txt 
+
+Step 3: run script 
+python main.py
+
+IMPORTANT!
+
+KEEP IN MIND THE DB CONFIGURATION SHOULD BE THE FOLLOWING
+
+host_name = 'localhost'
+user_name = 'root'
+user_password = 'root'
+
+
+this should produce the following in the terminal and initiate the database. 
+
+MySQL Database connection successful
+Database 'university_db' created or already exists.
+MySQL Database connection successful
+Inserted 12000 records into the Location table.
+Inserted 10000 records into the Student table.
+Inserted 10 records into the University table.
+Inserted 47 records into the Faculty table.
+Inserted 6 records into the EducationLevel table.
+Inserted 26 records into the EducationLevel table.
+Inserted 78 records into the Program table.
+Inserted 58 bachelors records into the Program_Term table.
+Inserted 75 master's records into the Program_Term table.
+Inserted 30 PhD records into the Program_Term table.
+Inserted 19 associates records into the Program_Term table.
+Inserted 54 records into the Modules table.
+Inserted 10000 records into the StudentModuleParticipation table.
+Inserted 44998 records into the Enrollment table successfully.
+Inserted 300 records into the Company table.
+Inserted 800 records into the JobTitle table.
+Inserted 20000 records into the Graduation table.
+Inserted 10000 records into the Work Experience table.
+

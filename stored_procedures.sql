@@ -21,6 +21,10 @@
 -- 1 Εισαγωγή νέου φοιτητή: Διευκολύνει την εισαγωγή νέων φοιτητών στη βάση δεδομένων, αυτοματοποιώντας τη διαδικασία καταχώρισης των απαραίτητων πληροφοριών για κάθε φοιτητή.
 
 
+ALSO MAKE SURE THAT THE OPTIONAL RELATIONSHIPS ARE DEPICTED IN THE SCHEMA WITH REMOVING THE NOT NULL PARAMETER. 
+
+
+
 DELIMITER //
 
 CREATE PROCEDURE InsertStudent(
