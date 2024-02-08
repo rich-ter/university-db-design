@@ -917,10 +917,11 @@ def generate_and_insert_modules(connection):
 # CHECK AGAIN I AM NOT SURE IF DATA ARE CORRECT. MAKE SURE TO MATCH STUDENTS WITH MODULES 
 # ALSO ACCORDING TO WHAT THEY HAVE SIGNED UP TO? 
 # NEEDS FIXING
+#HERE WE USE PARAMETER FROM MODULES ABOVE 
 def generate_and_insert_student_module_participation(connection, num):
     student_module_participations = []
-    module_id_range = list(range(1, 40))  # Example range, adjust based on your data
-    student_id_range = list(range(1, 50))  # Example range, adjust based on your data
+    module_id_range = list(range(1, 54))  # Example range, adjust based on your data
+    student_id_range = list(range(1, num))  # Example range, adjust based on your data
 
     for i in range(num):
         module_id = random.choice(module_id_range)
@@ -943,7 +944,7 @@ def generate_and_insert_student_module_participation(connection, num):
     try:
         cursor.executemany(insert_query, student_module_participations)
         connection.commit()
-        print(f"Inserted {len(student_module_participation)} records into the StudentModuleParticipation table.")
+        print(f"Inserted {len(student_module_participations)} records into the StudentModuleParticipation table.")
     except mysql.connector.Error as err:
         print(f"Error: {err}")
     finally:
@@ -983,68 +984,61 @@ program_term_related_to_uni_pi_ids = [
 ]
 
 # check again if students involved with unipi. check if no errors 
-def generate_and_insert_enrollments(connection, num):
-
+def generate_and_insert_enrollments(connection, num_students):
     enrollments = []
-    enrollment_id_counter = 1  # Start the counter for enrollment IDs
+    enrollment_id_counter = 1
 
-    # Generate enrollments for Bachelor programs
-    for _ in range(num):
-        student_id = fake.random_int(min=1, max=1000)
-        program_term_id = random.choice(bachelor_program_term_ids)
-        registration_date = fake.date_between(start_date="-2y", end_date="today")
+    students = [fake.random_int(min=1, max=10000) for _ in range(num_students)]
 
-        enrollment = (
-            enrollment_id_counter,
-            student_id,
-            program_term_id,
-            registration_date,
+    # Enroll every student in a UniPi program
+    for student_id in range(1,9999):
+        uni_pi_program_term_id = random.choice(program_term_related_to_uni_pi_ids)
+        uni_pi_registration_date = fake.date_between(start_date="-4y", end_date="-3y")
+
+        enrollments.append(
+            (enrollment_id_counter, student_id, uni_pi_program_term_id, uni_pi_registration_date)
         )
-        enrollments.append(enrollment)
-        enrollment_id_counter += 1  # Increment the enrollment ID for the next record
-
-    # Selecting half of the students for Master's programs
-    selected_student_ids_for_masters = random.sample([e[1] for e in enrollments], len(enrollments) // 2)
-    for student_id in selected_student_ids_for_masters:
-        program_term_id = random.choice(master_program_term_ids)
-        registration_date = fake.date_between(start_date="-2y", end_date="today")
-        
-        enrollment = (
-            enrollment_id_counter,
-            student_id,
-            program_term_id,
-            registration_date,
-        )
-        enrollments.append(enrollment)
         enrollment_id_counter += 1
 
-    # Selecting half of the Master's students for Ph.D. programs
-    selected_student_ids_for_phd = random.sample(selected_student_ids_for_masters, len(selected_student_ids_for_masters) // 2)
-    for student_id in selected_student_ids_for_phd:
-        program_term_id = random.choice(phd_program_term_ids)
-        registration_date = fake.date_between(start_date="-2y", end_date="today")
-        
-        enrollment = (
-            enrollment_id_counter,
-            student_id,
-            program_term_id,
-            registration_date,
+    # Enroll all students in a Bachelor program
+    for student_id in students:
+        bachelor_program_term_id = random.choice(bachelor_program_term_ids)
+        bachelor_registration_date = fake.date_between(start_date="-3y", end_date="-2y")
+
+        enrollments.append(
+            (enrollment_id_counter, student_id, bachelor_program_term_id, bachelor_registration_date)
         )
-        enrollments.append(enrollment)
         enrollment_id_counter += 1
 
+    # Select half of the students for Master's programs
+    master_students = random.sample(students, len(students) // 2)
+    for student_id in master_students:
+        master_program_term_id = random.choice(master_program_term_ids)
+        master_registration_date = fake.date_between(start_date="-2y", end_date="-1y")
 
-    # Create a cursor object
+        enrollments.append(
+            (enrollment_id_counter, student_id, master_program_term_id, master_registration_date)
+        )
+        enrollment_id_counter += 1
+
+    # Select half of the Master's students for Ph.D. programs
+    phd_students = random.sample(master_students, len(master_students) // 2)
+    for student_id in phd_students:
+        phd_program_term_id = random.choice(phd_program_term_ids)
+        phd_registration_date = fake.date_between(start_date="-1y", end_date="today")
+
+        enrollments.append(
+            (enrollment_id_counter, student_id, phd_program_term_id, phd_registration_date)
+        )
+        enrollment_id_counter += 1
+
+    # Insert enrollments into the database
     cursor = connection.cursor()
-
-    # SQL query for inserting data
     insert_query = "INSERT INTO Enrollment (enrollment_id, student_id, program_term_id, registration_date) VALUES (%s, %s, %s, %s)"
-
     try:
         cursor.executemany(insert_query, enrollments)
         connection.commit()
-        print(
-            f"Inserted {len(enrollments)} records into the Enrollment table.")
+        print(f"Inserted {len(enrollments)} records into the Enrollment table successfully.")
     except mysql.connector.Error as err:
         print(f"Error: {err}")
     finally:
@@ -1111,7 +1105,7 @@ def generate_and_insert_job_titles(connection, num):
 # Working perfect 
 def generate_and_insert_graduations(connection, num):
     graduations = []
-    location_id_range = list(range(1, 2000))  # Assuming you have 99 possible locations
+    location_id_range = list(range(1, 12000))  # Assuming you have 99 possible locations
 
     # Generate graduation data based on enrollment ids
     for enrollment_id in range(1, num + 1):
@@ -1147,11 +1141,13 @@ def generate_and_insert_graduations(connection, num):
         cursor.close()
 
 # Working but fix the ranges here to be real.
+# NEEDS STUDENT,COMPANY,JOB TITLE DATA
+
 def generate_and_insert_work_experiences(connection, num):
     work_experiences = []
-    student_id_range = list(range(1, 1000))  # Example range, adjust based on your data
-    company_id_range = list(range(1, 30))  # Example range, adjust based on your data
-    job_title_id_range = list(range(1, 21))  # Example range, adjust based on your data
+    student_id_range = list(range(1, 10000))  # Example range, adjust based on your data
+    company_id_range = list(range(1, 300))  # Example range, adjust based on your data
+    job_title_id_range = list(range(1, 800))  # Example range, adjust based on your data
     job_category_choices = ['SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting']
 
     for i, _ in enumerate(range(num), start=1):
