@@ -119,6 +119,29 @@ DELIMITER ;
 CALL GetFacultyJobCategoryPercentages('University of Piraeus', 2021);
 
 
+-- ποσοστό κατηγοριών εργασιακής εμπειρίας ανά κατηγορία τμήματος πανεπιστημίου
+
+
+CREATE PROCEDURE FindJobTitlePercentageForFaculty (
+    IN faculty_name VARCHAR(255),
+    IN university_name VARCHAR(255)
+)
+BEGIN
+    SELECT 
+        jt.title_name AS job_title,
+        COUNT(we.job_title_id) AS job_count,
+        ROUND((COUNT(we.job_title_id) * 100.0 / (SELECT COUNT(*) FROM WorkExperience WHERE student_id IN (SELECT student_id FROM Enrollment WHERE program_term_id IN (SELECT program_term_id FROM Program_Term WHERE program_id IN (SELECT program_id FROM Program WHERE faculty_id = (SELECT faculty_id FROM Faculty WHERE faculty_name = faculty_name) AND faculty_id IN (SELECT faculty_id FROM Faculty WHERE university_id = (SELECT university_id FROM University WHERE university_name = university_name))))))), 2) AS percentage
+    FROM WorkExperience we
+    JOIN JobTitle jt ON we.job_title_id = jt.title_id
+    WHERE we.student_id IN (SELECT student_id FROM Enrollment WHERE program_term_id IN (SELECT program_term_id FROM Program_Term WHERE program_id IN (SELECT program_id FROM Program WHERE faculty_id = (SELECT faculty_id FROM Faculty WHERE faculty_name = faculty_name) AND faculty_id IN (SELECT faculty_id FROM Faculty WHERE university_id = (SELECT university_id FROM University WHERE university_name = university_name))))))
+    GROUP BY jt.title_name
+    ORDER BY percentage DESC;
+END;
+
+
+
+
+
 
 -------------------------------------------------------------------------------------------------------------------------
 
