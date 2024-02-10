@@ -41,6 +41,11 @@ connection = connect_to_database(host_name, user_name, user_password, database_n
 if connection is not None:
     create_database_and_tables(connection)
 
+
+    #create indexes
+    # create triggers
+    # create stored procedures 
+    
     num_locations = 12000  
     generate_and_insert_locations(connection, num_locations)
 
