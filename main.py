@@ -72,7 +72,7 @@ if connection is not None:
     number_of_job_titles = 800
     generate_and_insert_job_titles(connection, number_of_job_titles)
 
-    generate_and_insert_graduations(connection, number_of_enrollments)
+    generate_and_insert_graduations(connection, 44998)
 
     number_of_work_experiences = 10000
     generate_and_insert_work_experiences(connection, number_of_work_experiences)

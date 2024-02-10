@@ -47,6 +47,36 @@ DELIMITER ;
 CALL InsertStudent(10001, 'Φίλιππος', 'Ρίχτερ', 'Δημήτριος', 'me@philipposrichter.com', '1989-01-08');
 
 
+-- find students with no work experience for the selected tiem frame for the given faculty 
+
+DELIMITER $$
+
+CREATE PROCEDURE FindStudentsWithoutWorkExperience(
+    IN facultyName VARCHAR(255),
+    IN universityName VARCHAR(255),
+    IN monthsAgo INT
+)
+BEGIN
+    SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.email
+    FROM Student s
+    JOIN Enrollment e ON s.student_id = e.student_id
+    JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
+    JOIN Program p ON pt.program_id = p.program_id
+    JOIN Faculty f ON p.faculty_id = f.faculty_id
+    JOIN University u ON f.university_id = u.university_id
+    LEFT JOIN WorkExperience w ON s.student_id = w.student_id AND w.start_date > DATE_SUB(CURDATE(), INTERVAL monthsAgo MONTH)
+    WHERE w.student_id IS NULL
+    AND f.faculty_name = facultyName
+    AND u.university_name = universityName
+    ORDER BY s.last_name, s.first_name;
+END$$
+
+DELIMITER ;
+
+-- για να την επικαλεστουμε 
+
+CALL FindStudentsWithoutWorkExperience('UoP Department of Digital Systems', 'University of Piraeus', 24);
+
 
 
 -- 2 πληθος φοιτητων ανα προγραμμα σπουδων και ανά χρονία
@@ -139,8 +169,65 @@ BEGIN
 END;
 
 
+-- γυρναει ποσοστο αποφοιτων που βρηκαν εργασία αναλογα με το δοθεν προγραμμα σπουδων
+
+DELIMITER $$
+
+CREATE PROCEDURE GetSuccessRatesByEducationLevel(IN inputEducationLevel VARCHAR(255))
+BEGIN
+    SELECT 
+        D.degree_name AS DegreeType,
+        COUNT(DISTINCT S.student_id) AS TotalGraduates,
+        COUNT(DISTINCT W.student_id) AS StudentsWithWorkExperience,
+        IF(COUNT(DISTINCT S.student_id) > 0, (COUNT(DISTINCT W.student_id) / COUNT(DISTINCT S.student_id)) * 100, 0) AS SuccessRate
+    FROM 
+        EducationLevel EL
+    JOIN Degree D ON EL.level_id = D.education_level_id
+    JOIN Program P ON D.degree_id = P.awarded_degree
+    JOIN Program_Term PT ON P.program_id = PT.program_id
+    JOIN Enrollment E ON PT.program_term_id = E.program_term_id
+    JOIN Student S ON E.student_id = S.student_id
+    LEFT JOIN WorkExperience W ON S.student_id = W.student_id
+    WHERE 
+        EL.level_name = inputEducationLevel
+    GROUP BY 
+        D.degree_name
+    ORDER BY 
+        SuccessRate DESC;
+END$$
+
+DELIMITER ;
+
+-- για να την επικαλεστουμε 
+
+CALL GetSuccessRatesByEducationLevel('Bachelors');
 
 
+-- μεσος ορος βασθων ανα προγραμμα για ενα δοθεν τμημα
+
+DELIMITER $$
+
+CREATE PROCEDURE GetAverageGradesByProgramInFaculty(IN 
+    inputFacultyName VARCHAR(255)
+)
+BEGIN
+    SELECT 
+        p.program_name, 
+        AVG(g.final_grade) AS AverageFinalGrade
+    FROM Graduation g
+    JOIN Enrollment e ON g.enrollment_id = e.enrollment_id
+    JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
+    JOIN Program p ON pt.program_id = p.program_id
+    JOIN Faculty f ON p.faculty_id = f.faculty_id
+    WHERE f.faculty_name = inputFacultyName
+    GROUP BY p.program_name
+    ORDER BY AverageFinalGrade DESC;
+END$$
+
+DELIMITER ;
+
+-- για να την επικαλεστουμε
+CALL GetAverageGradesByProgramInFaculty('UoP Department of Digital Systems');
 
 
 -------------------------------------------------------------------------------------------------------------------------
