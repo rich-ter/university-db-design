@@ -230,6 +230,150 @@ DELIMITER ;
 CALL GetAverageGradesByProgramInFaculty('UoP Department of Digital Systems');
 
 
+
+--Για ένα δοθέν τμήμα, επιστροφη των πιο γνωστων εργασιακων τίτλων ανα πρόγραμμα σπουδών, και τον αριθμό των προσλήψεων με τον συγκεκριμένο τίτλο.
+
+    DELIMITER $$
+CREATE PROCEDURE getJobTitleHiringByProgram(IN 
+    inputFacultyName VARCHAR(255)
+)
+BEGIN
+ SELECT 
+    program_name,
+    title_name AS most_common_job_title,
+    Προσλήψεις
+FROM (
+    SELECT p.program_name, jt.title_name, COUNT(*) AS Προσλήψεις, 
+        DENSE_RANK() OVER (PARTITION BY p.program_name ORDER BY COUNT(*) DESC) AS rnk
+    FROM Faculty f
+    JOIN Program p ON f.faculty_id = p.faculty_id
+    JOIN Enrollment e ON p.program_id = e.program_term_id
+    JOIN Student s ON e.student_id = s.student_id
+    JOIN WorkExperience we ON s.student_id = we.student_id
+    JOIN JobTitle jt ON we.job_title_id = jt.title_id
+    WHERE f.faculty_name = inputFacultyName
+    GROUP BY p.program_name, jt.title_name
+) AS ranked_titles
+WHERE rnk = 1
+ORDER BY program_name, Προσλήψεις DESC;
+END$$
+
+DELIMITER ;
+
+-- to call it 
+CALL getJobTitleHiringByProgram('UoP Department of Digital Systems');
+
+
+
+-- student report for enrolments, final grade, work experiences
+
+DELIMITER $$
+
+CREATE PROCEDURE `GetStudentProgressReport`(IN student_id_input INT)
+BEGIN
+
+    -- Declare variables to store student information
+    DECLARE student_first_name VARCHAR(255);
+    DECLARE student_last_name VARCHAR(255);
+
+    -- Retrieve and store student information
+    SELECT 
+        first_name, 
+        last_name 
+    INTO 
+        student_first_name, 
+        student_last_name
+    FROM 
+        Student
+    WHERE 
+        student_id = student_id_input;
+
+    -- Display student information
+    SELECT 
+        CONCAT('Progress Report for Student: ', student_first_name, ' ', student_last_name) AS 'Student Information';
+
+    -- Retrieve enrollment information for the student
+    SELECT 
+        e.enrollment_id,
+        p.program_name,
+        pt.start_date AS 'Program Start Date',
+        pt.end_date AS 'Program End Date',
+        g.final_grade
+    FROM 
+        Enrollment e
+    JOIN 
+        Program_Term pt ON e.program_term_id = pt.program_term_id
+    JOIN 
+        Program p ON pt.program_id = p.program_id
+    LEFT JOIN 
+        Graduation g ON e.enrollment_id = g.enrollment_id
+    WHERE 
+        e.student_id = student_id_input;
+
+    -- Retrieve work experiences for the student
+    SELECT 
+        w.start_date AS 'Start Date',
+        w.end_date AS 'End Date',
+        c.company_name AS 'Company',
+        jt.title_name AS 'Job Title',
+        w.description AS 'Description',
+        w.responsibilities AS 'Responsibilities'
+    FROM 
+        WorkExperience w
+    JOIN 
+        Company c ON w.company_id = c.company_id
+    JOIN 
+        JobTitle jt ON w.job_title_id = jt.title_id
+    WHERE 
+        w.student_id = student_id_input;
+
+END$$
+
+DELIMITER ;
+
+-- to call it
+
+CALL GetStudentProgressReport(155);
+
+
+-- TrackGraduateEmploymentTrends:  tracks the employment trends of graduates from a specific faculty in different sectors based on a specified graduation year range
+
+DELIMITER $$
+
+CREATE PROCEDURE GraduateExperiencePerIndustryForGivenTimeAndFaculty(
+    IN in_start_year INT,
+    IN in_end_year INT,
+    IN in_faculty_name VARCHAR(255)
+)
+BEGIN
+    SELECT 
+        c.industry AS Sector,
+        COUNT(DISTINCT we.student_id) AS NumberOfGraduates
+    FROM 
+        WorkExperience we
+    JOIN Company c ON we.company_id = c.company_id
+    JOIN (
+        SELECT DISTINCT e.student_id
+        FROM Graduation g
+        JOIN Enrollment e ON g.enrollment_id = e.enrollment_id
+        JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
+        JOIN Program p ON pt.program_id = p.program_id
+        JOIN Faculty f ON p.faculty_id = f.faculty_id
+        WHERE YEAR(g.graduation_date) BETWEEN in_start_year AND in_end_year
+        AND f.faculty_name = in_faculty_name
+    ) AS Graduates ON we.student_id = Graduates.student_id
+    GROUP BY c.industry
+    ORDER BY NumberOfGraduates DESC;
+END$$
+
+DELIMITER ;
+
+-- to call it 
+
+CALL GraduateExperiencePerIndustryForGivenTimeAndFaculty(2010, 2050, 'UoP Department of Business Administration');
+
+
+
 -------------------------------------------------------------------------------------------------------------------------
 
 
