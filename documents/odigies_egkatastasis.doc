@@ -1,5 +1,14 @@
 
 
+Όλα τα αρχεία και η πρόοδος της εργασίας βρίσκεται στο παρακάτω repository
+
+
+https://github.com/rich-ter/sql-exercise
+
+
+GIVE MY SCHEMA TO CHATGPT TO ENSURE IF IT'S QUITE CORRECT
+ALSO CROSS VERIFY WITH THE SCHEMA FROM DB DIAGRAM.IO 
+
 
 Καθώς απο την φυση της εργασιας απαιτειτε μεγαλος ογκος δεδομενων για την αναπαρασταση των ερωτηματων σε ενα πλαισιο του πραγματικου κοσμου, εχει δημιουργηθει μια εφαρμογη python η οποια δημιουργει εναν μεγαλο ογκο δεδομενων για να μπορεσουμε να αντλησουμε queries πανω σε αυτα τα δεδομενα. 
 

@@ -374,6 +374,64 @@ CALL GraduateExperiencePerIndustryForGivenTimeAndFaculty(2010, 2050, 'UoP Depart
 
 
 
+-- find concurrent enrolments
+
+DELIMITER $$
+
+CREATE PROCEDURE FindConcurrentEnrollments()
+BEGIN
+    SELECT e1.student_id, COUNT(DISTINCT e1.program_term_id) AS concurrent_enrollments
+    FROM Enrollment e1
+    JOIN Enrollment e2 ON e1.student_id = e2.student_id 
+                       AND e1.enrollment_id <> e2.enrollment_id 
+                       AND e1.registration_date = e2.registration_date
+    GROUP BY e1.student_id
+    HAVING concurrent_enrollments > 1;
+END$$
+
+DELIMITER ;
+
+
+-- to call it 
+
+
+CALL FindConcurrentEnrollments();
+
+
+-- university program report
+
+DELIMITER $$
+
+CREATE PROCEDURE `GenerateUniversityProgramReport`(
+    IN `university_name` VARCHAR(255),
+    IN `start_date` DATE,
+    IN `end_date` DATE
+)
+BEGIN
+    SELECT 
+        p.subject_type,
+        COUNT(DISTINCT pt.program_term_id) AS number_of_program_terms,
+        COUNT(e.enrollment_id) AS number_of_enrollments
+    FROM 
+        University u
+        JOIN Faculty f ON u.university_id = f.university_id
+        JOIN Program p ON f.faculty_id = p.faculty_id
+        JOIN Program_Term pt ON p.program_id = pt.program_id
+        LEFT JOIN Enrollment e ON pt.program_term_id = e.program_term_id
+    WHERE 
+        u.university_name = university_name
+        AND pt.start_date >= start_date
+        AND pt.end_date <= end_date
+    GROUP BY 
+        p.subject_type;
+END$$
+
+DELIMITER ;
+
+-- to call it 
+
+CALL GenerateUniversityProgramReport('University of Piraeus', '1997-01-01', '2040-01-01');
+
 -------------------------------------------------------------------------------------------------------------------------
 
 

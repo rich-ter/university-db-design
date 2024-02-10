@@ -1001,7 +1001,7 @@ def generate_and_insert_enrollments(connection, num_students):
         enrollment_id_counter += 1
 
     # Enroll all students in a Bachelor program
-    for student_id in students:
+    for student_id in  range(1,10001):
         bachelor_program_term_id = random.choice(bachelor_program_term_ids)
         bachelor_registration_date = fake.date_between(start_date="-3y", end_date="-2y")
 
