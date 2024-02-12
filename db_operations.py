@@ -164,7 +164,8 @@ def create_database_and_tables(connection):
     CREATE TABLE IF NOT EXISTS JobTitle (
         title_id INT PRIMARY KEY,
         title_name VARCHAR(255) NOT NULL,
-        job_type ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
+        job_type ENUM('Internship', 'Apprenticeship ', 'Permanent'),
+        job_category ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
         description VARCHAR(255) NOT NULL
     );
     """,
@@ -174,7 +175,6 @@ def create_database_and_tables(connection):
         student_id INT NOT NULL,
         company_id INT NOT NULL,
         job_title_id INT NOT NULL,
-        job_category ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
         start_date DATE NOT NULL,
         end_date DATE NOT NULL,
         description VARCHAR(255) NOT NULL,
@@ -195,6 +195,73 @@ def create_database_and_tables(connection):
         print(e)
     finally:
         cursor.close()
+
+
+
+def create_stored_procedures(connection):
+    stored_procedures = [
+        """
+        CREATE PROCEDURE InsertStudent(
+            IN first_name VARCHAR(255),
+            IN last_name VARCHAR(255),
+            IN father_name VARCHAR(255),
+            IN email VARCHAR(255),
+            IN date_of_birth DATE
+        )
+        BEGIN
+            INSERT INTO Student (first_name, last_name, father_name, email, date_of_birth)
+            VALUES (first_name, last_name, father_name, email, date_of_birth);
+        END;
+        """,
+        """
+        CREATE PROCEDURE FindStudentsWithoutWorkExperience(
+            IN facultyName VARCHAR(255),
+            IN universityName VARCHAR(255),
+            IN monthsAgo INT
+        )
+        BEGIN
+            SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.email
+            FROM Student s
+            JOIN Enrollment e ON s.student_id = e.student_id
+            JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
+            JOIN Program p ON pt.program_id = p.program_id
+            JOIN Faculty f ON p.faculty_id = f.faculty_id
+            JOIN University u ON f.university_id = u.university_id
+            LEFT JOIN WorkExperience w ON s.student_id = w.student_id AND w.start_date > DATE_SUB(CURDATE(), INTERVAL monthsAgo MONTH)
+            WHERE w.student_id IS NULL
+            AND f.faculty_name = facultyName
+            AND u.university_name = universityName
+            ORDER BY s.last_name, s.first_name;
+        END;
+        """
+    ]
+
+    cursor = connection.cursor()
+    try:
+        for procedure in stored_procedures:
+            cursor.execute(procedure)
+        print("Stored procedures created successfully.")
+    except Error as e:
+        print(f"Error creating stored procedures: {e}")
+    finally:
+        cursor.close()
+
+
+def create_triggers(connection):
+    pass
+
+
+def create_indexes(connection):
+    pass
+
+def create_views_roles(connection):
+    pass
+
+
+
+
+
+
 
 # Working perfect 
 def generate_and_insert_locations(connection, num):
@@ -1086,12 +1153,13 @@ def generate_and_insert_job_titles(connection, num):
             fake.job(),  # title_name
             random.choice(['SoftwareEngineering', 'accounting', 'Shipping',
                           'DataScience', 'Business', 'Sales', 'Consulting']),  # job_type
+            random.choice(['Internship', 'Apprenticeship ', 'Permanent']),
             fake.text(max_nb_chars=255),  # description
         )
         job_titles.append(job_title)
 
     # Assuming your table has columns (title_id, title_name, job_type, description)
-    insert_query = "INSERT INTO JobTitle (title_id, title_name, job_type, description) VALUES (%s, %s, %s, %s)"
+    insert_query = "INSERT INTO JobTitle (title_id, title_name, job_category, job_type, description) VALUES (%s, %s, %s, %s, %s)"
 
     try:
         cursor.executemany(insert_query, job_titles)
@@ -1148,13 +1216,11 @@ def generate_and_insert_work_experiences(connection, num):
     student_id_range = list(range(1, 10000))  # Example range, adjust based on your data
     company_id_range = list(range(1, 300))  # Example range, adjust based on your data
     job_title_id_range = list(range(1, 800))  # Example range, adjust based on your data
-    job_category_choices = ['SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting']
 
     for i, _ in enumerate(range(num), start=1):
         student_id = random.choice(student_id_range)
         company_id = random.choice(company_id_range)
         job_title_id = random.choice(job_title_id_range)
-        job_category = random.choice(job_category_choices)
         start_date = fake.date_between(start_date="-5y", end_date="today")
         end_date = fake.date_between(start_date=start_date, end_date="+2y")
         description = fake.sentence(nb_words=10)
@@ -1166,7 +1232,6 @@ def generate_and_insert_work_experiences(connection, num):
             student_id,               
             company_id,               
             job_title_id,            
-            job_category,             
             start_date,               
             end_date,                
             description,              
@@ -1178,8 +1243,8 @@ def generate_and_insert_work_experiences(connection, num):
     cursor = connection.cursor()
     insert_query = """
     INSERT INTO WorkExperience 
-    (experience_id, student_id, company_id, job_title_id, job_category, start_date, end_date, description, responsibilities) 
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    (experience_id, student_id, company_id, job_title_id, start_date, end_date, description, responsibilities) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
 
     try:

@@ -122,7 +122,8 @@
     CREATE TABLE IF NOT EXISTS JobTitle (
         title_id INT PRIMARY KEY,
         title_name VARCHAR(255) NOT NULL,
-        job_type ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
+        job_type ENUM('Internship', 'Apprenticeship ', 'Permanent'),
+        job_category ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
         description VARCHAR(255) NOT NULL
     );
     CREATE TABLE IF NOT EXISTS WorkExperience (
@@ -130,7 +131,6 @@
         student_id INT NOT NULL,
         company_id INT NOT NULL,
         job_title_id INT NOT NULL,
-        job_category ENUM('SoftwareEngineering', 'accounting', 'Shipping', 'DataScience', 'Business', 'Sales', 'Consulting'),
         start_date DATE NOT NULL,
         end_date DATE NOT NULL,
         description VARCHAR(255) NOT NULL,

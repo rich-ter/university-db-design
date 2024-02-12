@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
-from db_operations import generate_and_insert_locations, create_database_and_tables, generate_and_insert_students, generate_and_insert_universities, generate_and_insert_faculties, generate_and_insert_educationLevel, generate_and_insert_degree, generate_and_insert_Program, generate_and_insert_Programterm, generate_and_insert_modules, generate_and_insert_enrollments, generate_and_insert_companies, generate_and_insert_job_titles, generate_and_insert_graduations, generate_and_insert_work_experiences, generate_and_insert_student_module_participation
+from db_operations import generate_and_insert_locations, create_database_and_tables, generate_and_insert_students, generate_and_insert_universities, generate_and_insert_faculties, generate_and_insert_educationLevel, generate_and_insert_degree, generate_and_insert_Program, generate_and_insert_Programterm, generate_and_insert_modules, generate_and_insert_enrollments, generate_and_insert_companies, generate_and_insert_job_titles, generate_and_insert_graduations, generate_and_insert_work_experiences, generate_and_insert_student_module_participation, create_stored_procedures
 
 
 def create_database(connection, database_name):
@@ -8,6 +8,22 @@ def create_database(connection, database_name):
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database_name}")
     print(f"Database '{database_name}' created or already exists.")
     cursor.close()
+
+
+
+def execute_sql_file(connection, file_path):
+    cursor = connection.cursor()
+    try:
+        with open(file_path, 'r') as file:
+            # Filter out DELIMITER lines and join the rest into a single string
+            sql_script = ''.join(line for line in file if not line.startswith('DELIMITER'))
+            # Execute the procedure creation command
+            cursor.execute(sql_script)
+        print("Stored procedure executed successfully.")
+    except Error as err:
+        print(f"Error: '{err}' executing stored procedure from file: {file_path}")
+    finally:
+        cursor.close()
 
 def connect_to_database(host_name, user_name, user_password, database_name=None):
     connection = None
@@ -40,11 +56,14 @@ connection = connect_to_database(host_name, user_name, user_password, database_n
 
 if connection is not None:
     create_database_and_tables(connection)
-
+    # file_path = 'path/to/your/stored_procedures.sql'
+    # execute_sql_file(connection, 'codebase/test_s_proc.sql')
 
     #create indexes
     # create triggers
     # create stored procedures 
+    
+    create_stored_procedures(connection)
     
     num_locations = 12000  
     generate_and_insert_locations(connection, num_locations)
