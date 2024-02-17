@@ -1,4 +1,5 @@
 --1. Εύρεση φοιτητών που δεν έχουν εργασιακή εμπειρία για το επιλεγμένο διάστημα σε ένα επιλεγμένο τμήμα.
+
 DELIMITER $$
 CREATE PROCEDURE FacultyStudentsWithoutWorkInPeriod(
     IN facultyName VARCHAR(255),
@@ -6,7 +7,7 @@ CREATE PROCEDURE FacultyStudentsWithoutWorkInPeriod(
     IN endDate DATE
 )
 BEGIN
-    SELECT DISTINCT s.student_id AS total_students_without_work_experience
+    SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.email
     FROM Student s
     JOIN Enrollment e ON s.student_id = e.student_id
     JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
@@ -25,7 +26,8 @@ DELIMITER ;
 
 CALL FacultyStudentsWithoutWorkInPeriod('UoP Department of Digital Systems', '1900-08-01', '2500-08-01');
 
---2. Εύρεση μέσου όρου βαθμού αποφοίτησης ανα πρόγραμμα σπουδών για ένα δόθεν τμήμα. 
+--2. Εύρεση μέσου όρου βαθμού αποφοίτησης ανα πρόγραμμα σπουδών για ένα δοθέν τμήμα. 
+
 DELIMITER $$
 CREATE PROCEDURE GetAverageGradesByProgramInFaculty(IN
     inputFacultyName VARCHAR(255)
@@ -47,7 +49,7 @@ DELIMITER ;
 
 CALL GetAverageGradesByProgramInFaculty('UoP Department of Digital Systems');
 
---3. Ποσοστο επιτυχίας εύρεσης εργασίας ανάλογα με το πτυχίο των αποφοιτων για ένα δοθέν επίπεδο σπουδών
+--3. Ποσοστό επιτυχίας εύρεσης εργασίας ανάλογα με το πτυχίο των αποφοίτων για ένα δοθέν επίπεδο σπουδών.
 
 DELIMITER $$
 CREATE PROCEDURE GetSuccessRatesByEducationLevel(IN inputEducationLevel VARCHAR(255))
@@ -74,7 +76,8 @@ DELIMITER ;
 CALL GetSuccessRatesByEducationLevel('Bachelors');
 
 
---4. Για ένα δοθέν τμήμα, επιστροφη του πιο γνωστου εργασιακου τίτλου με βάση των αριθμό των προσλήψεων και αυτος ο αριθμος ανα πρόγραμμα σπουδών.
+--4. Για ένα δοθέν τμήμα, επιστροφή εργασιακών τίτλων των αποφοίτων και πλήθος αυτών ανά πρόγραμμα σπουδών. 
+
 DELIMITER $$
 CREATE PROCEDURE getJobTitleHiringByProgram(IN inputFacultyName VARCHAR(255))
 BEGIN
@@ -96,6 +99,7 @@ END$$
 DELIMITER ;
 
 --5. Για ένα δοθέν κωδικό φοιτητή, αναφορά για τις εγγραφές του σε προγράμματα σπουδών και εργασιακές εμπειρίες που έχει αποκτήσει. 
+
 DELIMITER $$
 CREATE PROCEDURE `GetStudentProgressReport`(IN student_id_input INT)
 BEGIN
@@ -134,7 +138,8 @@ BEGIN
 END$$
 DELIMITER ;
 
---6. Για ένα δόθεν χρονικό διάστημα και τμήμα πανεπιστημίου, επιστροφή των εργασιακών εμπειριών των αποφοίτων. 
+--6. Για ένα δοθέν χρονικό διάστημα και τμήμα πανεπιστημίου, επιστροφή του πλήθους εργασιακών εμπειριών ανά τομέα απασχόλησης αποφοίτων.  
+
 DELIMITER $$
 CREATE PROCEDURE GraduateExperiencePerIndustryForGivenTimeAndFaculty(
     IN in_start_year INT,
@@ -163,7 +168,7 @@ BEGIN
 END$$
 DELIMITER ;
 
---7. Απόφοιτοι που εγγράφηκαν ταυτόχρονα σε παραπάνω από ένα Τμήματα.
+--7. Απόφοιτοι που εγγράφηκαν ταυτόχρονα σε παραπάνω από ένα προγράμματα σπουδών την ίδια ημερομηνία.
 DELIMITER $$
 CREATE PROCEDURE FindConcurrentEnrollments()
 BEGIN
@@ -177,7 +182,8 @@ BEGIN
 END$$
 DELIMITER ;
 
---8. GenerateUniversityProgramReport
+--8. Για ένα δοθέν όνομα Πανεπιστημίου, και χρονικό εύρος, αναφορά για τα προγράμματα σπουδών, τα τμήματα αυτών και τις σχετικές εγγραφές φοιτητών. 
+
 DELIMITER $$
 CREATE PROCEDURE `GenerateUniversityProgramReport`(
     IN `university_name` VARCHAR(255),

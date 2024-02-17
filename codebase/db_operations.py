@@ -206,7 +206,7 @@ def create_stored_procedures(connection):
             IN endDate DATE
         )
         BEGIN
-            SELECT DISTINCT s.student_id AS total_students_without_work_experience
+            SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.email
             FROM Student s
             JOIN Enrollment e ON s.student_id = e.student_id
             JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
@@ -515,7 +515,8 @@ def create_indexes(connection):
         "CREATE INDEX idx_student_module_part_stud ON StudentModuleParticipation(student_id);",
         "CREATE INDEX idx_student_module_part_mod ON StudentModuleParticipation(module_id);",
         "CREATE INDEX idx_graduation_enrollment ON Graduation(enrollment_id);",
-        "CREATE INDEX idx_graduation_final_grade ON Graduation(final_grade);"
+        "CREATE INDEX idx_graduation_final_grade ON Graduation(final_grade);",
+        "CREATE INDEX idx_graduation_location ON Graduation(location_id);"
     ]
 
     cursor = connection.cursor()

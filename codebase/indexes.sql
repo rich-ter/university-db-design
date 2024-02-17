@@ -54,3 +54,4 @@ CREATE INDEX idx_student_module_part_mod ON StudentModuleParticipation(module_id
 --------- TABLE GRADUATION ---------
 CREATE INDEX idx_graduation_enrollment ON Graduation(enrollment_id);
 CREATE INDEX idx_graduation_final_grade ON Graduation(final_grade);
+CREATE INDEX idx_graduation_final_grade ON Graduation(location_id);

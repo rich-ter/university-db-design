@@ -1,5 +1,5 @@
 -- 1. Πλήθος εγγραφών ανά πρόγραμμα σπουδών για το πανεπιστημιο Πειραια 
-SELECT p.program_id, p.program_name, COUNT(e.student_id) AS Σύνολο Εγγραφών
+SELECT p.program_id, p.program_name, COUNT(e.student_id) AS `Σύνολο Εγγραφών`
 FROM Program p
 JOIN Program_Term pt ON p.program_id = pt.program_id
 JOIN Enrollment e ON pt.program_term_id = e.program_term_id
@@ -9,15 +9,15 @@ WHERE u.university_name = 'University of Piraeus'
 GROUP BY p.program_id, p.program_name;
 
 -- 2. Πλήθος και ποσοστό παροχής εργασιακών εμπειριών ανα εταιρια 
-SELECT c.company_name, COUNT(we.experience_id) AS Αριθμός Προσλήψεων, ROUND((COUNT(we.experience_id) * 100.0 / total.total_count), 2) AS Ποσοστό σε σχέση με τις προσλήψεις
+SELECT c.company_name, COUNT(we.experience_id) AS `Αριθμός Προσλήψεων`, ROUND((COUNT(we.experience_id) * 100.0 / total.total_count), 2) AS `Ποσοστό σε σχέση με τις προσλήψεις`
 FROM Company c
 JOIN WorkExperience we ON c.company_id = we.company_id
 CROSS JOIN (SELECT COUNT(*) as total_count FROM WorkExperience) total
 GROUP BY c.company_name, total.total_count
-ORDER BY number_of_experiences DESC;
+ORDER BY `Αριθμός Προσλήψεων` DESC;
 
 -- 3. Ποσοστο αριστούχων μαθητών ανά πανεπιστήμιο
-SELECT u.university_name, COUNT(CASE WHEN g.top_of_class THEN 1 ELSE NULL END) * 100.0 / COUNT(*) AS % Αριστούχοι
+SELECT u.university_name, COUNT(CASE WHEN g.top_of_class THEN 1 ELSE NULL END) * 100.0 / COUNT(*) AS `% Αριστούχοι`
 FROM Graduation g
 JOIN Enrollment e ON g.enrollment_id = e.enrollment_id
 JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
@@ -25,7 +25,7 @@ JOIN Program p ON pt.program_id = p.program_id
 JOIN Faculty f ON p.faculty_id = f.faculty_id
 JOIN University u ON f.university_id = u.university_id
 GROUP BY u.university_name
-ORDER BY Top_Percentage DESC;
+ORDER BY `% Αριστούχοι`DESC;
 
 -- 4. Πλήθος μαθημάτων ανά πρόγραμμα σπουδών ανα πανεπιστήμιο
 SELECT u.university_name AS Πανεπιστήμιο, p.program_name AS Πρόγραμμα_Σπουδών,
@@ -52,5 +52,4 @@ JOIN Location l ON c.location_id = l.location_id
 GROUP BY l.city
 ORDER BY Πλήθος_Εταιρειών DESC
 LIMIT 10;
-
 
