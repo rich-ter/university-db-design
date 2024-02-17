@@ -1,21 +1,9 @@
-to add a description of the project here
+Τα αρχεία αποτελούν το σύνολο για τον σχεδιασμό και την υλοποίηση μιας SQL βάσης δεδομένων (MySQL) για ένα πανεπιστημιακό σύστημα διαχείρισης αποφοίτων.
 
-codebase 
-    indexes.sql
-    queries.sql
-    schema.sql
-    stored_procedures
-    triggers.sql
-    views_roles.sql
+Τεχνικές Προδιαγραφές Συστημάτων:
+MySQL Version: 8.0.27
+Python Version: 3.9.7
 
-documents
-    db-schema.pdf
-    odigies_egkatastasis.doc
-
-venv 
-    virtual enviroment files
-
-db_operations.py
-main.py
-requirements.txt
-
+Για την υλοποίησή της εισαγωγής δεδομένων, έχουν δημιουργηθεί 2 αρχεία:
+(1) Το db_operations.py το οποίο είναι ένα αρχείο python 1,600+ γραμμών που εμπεριέχει όλες τις εντολές για την δημιουργία πινάκων, δεδομένα σε αυτούς, δημιουργία των stored procedures, triggers, indexes, views και roles.
+(2) Το main.py το οποίο είναι ένα python αρχείο 100 γραμμών που εμπεριέχει την λογική για την σύνδεση στην βάση δεδομένων, την λογική με την οποία καλούνται τα functions απο το αρχείο db_operations.py και γενικώς ορίζει τις παραμέτρους όπως username, password για την βάση.

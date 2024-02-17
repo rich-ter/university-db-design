@@ -1569,9 +1569,9 @@ def generate_and_insert_graduations(connection, num):
 
 def generate_and_insert_work_experiences(connection, num):
     work_experiences = []
-    student_id_range = list(range(1, 10000))  # Example range, adjust based on your data
-    company_id_range = list(range(1, 300))  # Example range, adjust based on your data
-    job_title_id_range = list(range(1, 800))  # Example range, adjust based on your data
+    student_id_range = list(range(1, 10000))  
+    company_id_range = list(range(1, 300))  
+    job_title_id_range = list(range(1, 800))  
 
     for i, _ in enumerate(range(num), start=1):
         student_id = random.choice(student_id_range)
@@ -1582,9 +1582,8 @@ def generate_and_insert_work_experiences(connection, num):
         description = fake.sentence(nb_words=10)
         responsibilities = fake.sentence(nb_words=15)
 
-        # Append the counter 'i' as experience_id
         work_experience = (
-            i,                         # Counter for experience_id
+            i,                         
             student_id,               
             company_id,               
             job_title_id,            
@@ -1595,7 +1594,6 @@ def generate_and_insert_work_experiences(connection, num):
         )
         work_experiences.append(work_experience)
 
-    # Assuming 'connection' is your MySQL database connection
     cursor = connection.cursor()
     insert_query = """
     INSERT INTO WorkExperience 
