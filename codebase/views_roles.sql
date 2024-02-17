@@ -43,25 +43,26 @@ CREATE ROLE 'DataAnalyst';
 CREATE ROLE 'CompanyRepresentative';
 CREATE ROLE 'StudentServicesOfficer';
 
-GRANT ALL PRIVILEGES ON *.* TO 'Administrator';
+GRANT ALL PRIVILEGES ON university_db.* TO 'Administrator';
 
-GRANT SELECT, INSERT, UPDATE ON `Modules` TO 'AcademicStaff';
+GRANT SELECT, INSERT, UPDATE ON university_db.`Modules` TO 'AcademicStaff';
 
-GRANT SELECT ON `University` TO 'DataAnalyst';
-GRANT SELECT ON `Faculty` TO 'DataAnalyst';
-GRANT SELECT ON `Program` TO 'DataAnalyst';
-GRANT SELECT ON `Modules` TO 'DataAnalyst';
-GRANT SELECT ON `Student` TO 'DataAnalyst';
-GRANT SELECT ON `Enrollment` TO 'DataAnalyst';
-GRANT SELECT ON `Company` TO 'DataAnalyst';
-GRANT SELECT ON `WorkExperience` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`University` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`Faculty` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`Program` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`Modules` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`Student` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`Enrollment` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`Company` TO 'DataAnalyst';
+GRANT SELECT ON university_db.`WorkExperience` TO 'DataAnalyst';
 
-GRANT SELECT, INSERT, UPDATE ON `Company` TO 'CompanyRepresentative';
-GRANT SELECT, INSERT, UPDATE ON `WorkExperience` TO 'CompanyRepresentative';
+GRANT SELECT, INSERT, UPDATE ON university_db.`Company` TO 'CompanyRepresentative';
+GRANT SELECT, INSERT, UPDATE ON university_db.`WorkExperience` TO 'CompanyRepresentative';
 
-GRANT SELECT, INSERT, UPDATE ON `Student` TO 'StudentServicesOfficer';
-GRANT SELECT, INSERT, UPDATE ON `Enrollment` TO 'StudentServicesOfficer';
-GRANT SELECT, INSERT, UPDATE ON `Graduation` TO 'StudentServicesOfficer';
+GRANT SELECT, INSERT, UPDATE ON university_db.`Student` TO 'StudentServicesOfficer';
+GRANT SELECT, INSERT, UPDATE ON university_db.`Enrollment` TO 'StudentServicesOfficer';
+GRANT SELECT, INSERT, UPDATE ON university_db.`Graduation` TO 'StudentServicesOfficer';
+
 
 GRANT 'Administrator' TO 'username'@'host';
 
