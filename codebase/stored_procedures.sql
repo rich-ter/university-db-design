@@ -1,30 +1,31 @@
---Εύρεση φοιτητών που δεν έχουν εργασιακή εμπειρία για το επιλεγμένο διάστημα σε ένα επιλεγμένο τμήμα.
-
+--1. Εύρεση φοιτητών που δεν έχουν εργασιακή εμπειρία για το επιλεγμένο διάστημα σε ένα επιλεγμένο τμήμα.
 DELIMITER $$
-CREATE PROCEDURE FindStudentsWithoutWorkExperience(
+CREATE PROCEDURE FacultyStudentsWithoutWorkInPeriod(
     IN facultyName VARCHAR(255),
-    IN universityName VARCHAR(255),
-    IN monthsAgo INT
+    IN startDate DATE,
+    IN endDate DATE
 )
 BEGIN
-    SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.email
+    SELECT DISTINCT s.student_id AS total_students_without_work_experience
     FROM Student s
     JOIN Enrollment e ON s.student_id = e.student_id
     JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
     JOIN Program p ON pt.program_id = p.program_id
     JOIN Faculty f ON p.faculty_id = f.faculty_id
-    JOIN University u ON f.university_id = u.university_id
-    LEFT JOIN WorkExperience w ON s.student_id = w.student_id AND w.start_date > DATE_SUB(CURDATE(), INTERVAL monthsAgo MONTH)
-    WHERE w.student_id IS NULL
-    AND f.faculty_name = facultyName
-    AND u.university_name = universityName
-    ORDER BY s.last_name, s.first_name;
+    LEFT JOIN WorkExperience we ON s.student_id = we.student_id
+        AND (
+            (we.start_date BETWEEN startDate AND endDate)
+            OR
+            (we.end_date BETWEEN startDate AND endDate)
+        )
+    WHERE f.faculty_name = facultyName
+        AND we.student_id IS NULL;
 END$$
 DELIMITER ;
 
---Εύρεση μέσου όρου βαθμού αποφοίτησης ανα πρόγραμμα σπουδών για ένα δόθεν τμήμα. Is this math right? Wtf is avg on final grade?
+CALL FacultyStudentsWithoutWorkInPeriod('UoP Department of Digital Systems', '1900-08-01', '2500-08-01');
 
-
+--2. Εύρεση μέσου όρου βαθμού αποφοίτησης ανα πρόγραμμα σπουδών για ένα δόθεν τμήμα. 
 DELIMITER $$
 CREATE PROCEDURE GetAverageGradesByProgramInFaculty(IN
     inputFacultyName VARCHAR(255)
@@ -32,7 +33,7 @@ CREATE PROCEDURE GetAverageGradesByProgramInFaculty(IN
 BEGIN
     SELECT
         p.program_name,
-        AVG(g.final_grade) AS AverageFinalGrade
+        AVG(g.final_grade) AS `ΜΟ Τελικού Βαθμού`
     FROM Graduation g
     JOIN Enrollment e ON g.enrollment_id = e.enrollment_id
     JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
@@ -40,20 +41,22 @@ BEGIN
     JOIN Faculty f ON p.faculty_id = f.faculty_id
     WHERE f.faculty_name = inputFacultyName
     GROUP BY p.program_name
-    ORDER BY AverageFinalGrade DESC;
+    ORDER BY `ΜΟ Τελικού Βαθμού` DESC;
 END$$
 DELIMITER ;
 
--- Ποσοστο αποφοιτων που βρηκαν εργασία αναλογα με το δοθεν προγραμμα σπουδων
+CALL GetAverageGradesByProgramInFaculty('UoP Department of Digital Systems');
+
+--3. Ποσοστο επιτυχίας εύρεσης εργασίας ανάλογα με το πτυχίο των αποφοιτων για ένα δοθέν επίπεδο σπουδών
 
 DELIMITER $$
 CREATE PROCEDURE GetSuccessRatesByEducationLevel(IN inputEducationLevel VARCHAR(255))
 BEGIN
     SELECT
-        D.degree_name AS DegreeType,
-        COUNT(DISTINCT S.student_id) AS TotalGraduates,
-        COUNT(DISTINCT W.student_id) AS StudentsWithWorkExperience,
-        IF(COUNT(DISTINCT S.student_id) > 0, (COUNT(DISTINCT W.student_id) / COUNT(DISTINCT S.student_id)) * 100, 0) AS SuccessRate
+        D.degree_name,
+        COUNT(DISTINCT S.student_id) AS Σύνολο_Αποφοίτων,
+        COUNT(DISTINCT W.student_id) AS Απόφοιτοι_Με_Εμπειρία,
+        IF(COUNT(DISTINCT S.student_id) > 0, (COUNT(DISTINCT W.student_id) / COUNT(DISTINCT S.student_id)) * 100, 0) AS Ποσοστό_Επιτυχίας
     FROM
         EducationLevel EL
     JOIN Degree D ON EL.level_id = D.education_level_id
@@ -64,42 +67,35 @@ BEGIN
     LEFT JOIN WorkExperience W ON S.student_id = W.student_id
     WHERE EL.level_name = inputEducationLevel
     GROUP BY D.degree_name
-    ORDER BY SuccessRate DESC;
+    ORDER BY Ποσοστό_Επιτυχίας DESC;
 END$$
 DELIMITER ;
 
--- Για ένα δοθέν τμήμα, επιστροφη του πιο γνωστου εργασιακου τίτλου με βάση των αριθμό των προσλήψεων και αυτος ο αριθμος ανα πρόγραμμα σπουδών.
+CALL GetSuccessRatesByEducationLevel('Bachelors');
 
+
+--4. Για ένα δοθέν τμήμα, επιστροφη του πιο γνωστου εργασιακου τίτλου με βάση των αριθμό των προσλήψεων και αυτος ο αριθμος ανα πρόγραμμα σπουδών.
 DELIMITER $$
-CREATE PROCEDURE getJobTitleHiringByProgram(IN
-    inputFacultyName VARCHAR(255)
-)
+CREATE PROCEDURE getJobTitleHiringByProgram(IN inputFacultyName VARCHAR(255))
 BEGIN
  SELECT
-    program_name,
-    title_name AS most_common_job_title,
-    Προσλήψεις
-FROM (
-    SELECT p.program_name, jt.title_name, COUNT(*) AS Προσλήψεις,
-        DENSE_RANK() OVER (PARTITION BY p.program_name ORDER BY COUNT(*) DESC) AS rnk
-    FROM Faculty f
-    JOIN Program p ON f.faculty_id = p.faculty_id
-    JOIN Enrollment e ON p.program_id = e.program_term_id
-    JOIN Student s ON e.student_id = s.student_id
-    JOIN WorkExperience we ON s.student_id = we.student_id
-    JOIN JobTitle jt ON we.job_title_id = jt.title_id
-    WHERE f.faculty_name = inputFacultyName
-    GROUP BY p.program_name, jt.title_name
-) AS ranked_titles
-WHERE rnk = 1
-ORDER BY program_name, Προσλήψεις DESC;
+    p.program_name,
+    jt.title_name AS job_title,
+    COUNT(*) AS Προσλήψεις
+ FROM Student s
+ JOIN Enrollment e ON s.student_id = e.student_id
+ JOIN Program_Term pt ON e.program_term_id = pt.program_term_id
+ JOIN Program p ON pt.program_id = p.program_id
+ JOIN Faculty f ON p.faculty_id = f.faculty_id
+ JOIN WorkExperience we ON s.student_id = we.student_id
+ JOIN JobTitle jt ON we.job_title_id = jt.title_id
+ WHERE f.faculty_name = inputFacultyName
+ GROUP BY p.program_name, jt.title_name
+ ORDER BY p.program_name, COUNT(*) DESC;
 END$$
-
-
 DELIMITER ;
 
---Για ένα δοθέν κωδικό φοιτητή, αναφορά για τις εγγραφές του σε προγράμματα σπουδών και εργασιακές εμπειρίες που έχει αποκτήσει. 
-
+--5. Για ένα δοθέν κωδικό φοιτητή, αναφορά για τις εγγραφές του σε προγράμματα σπουδών και εργασιακές εμπειρίες που έχει αποκτήσει. 
 DELIMITER $$
 CREATE PROCEDURE `GetStudentProgressReport`(IN student_id_input INT)
 BEGIN
@@ -138,11 +134,8 @@ BEGIN
 END$$
 DELIMITER ;
 
---Για ένα δόθεν χρονικό διάστημα και τμήμα πανεπιστημίου, επιστροφή των εργασιακών εμπειριών των αποφοίτων. ΑΥΤΟ ΕΙΝΑΙ ΛΑΘΟΣ ΜΕ ΤΗΝ ΗΜΕΡΟΜΗΝΙΑ 
-
+--6. Για ένα δόθεν χρονικό διάστημα και τμήμα πανεπιστημίου, επιστροφή των εργασιακών εμπειριών των αποφοίτων. 
 DELIMITER $$
-
-
 CREATE PROCEDURE GraduateExperiencePerIndustryForGivenTimeAndFaculty(
     IN in_start_year INT,
     IN in_end_year INT,
@@ -168,12 +161,9 @@ BEGIN
     GROUP BY c.industry
     ORDER BY NumberOfGraduates DESC;
 END$$
-
-
 DELIMITER ;
 
--- Απόφοιτοι που εγγράφηκαν ταυτόχρονα σε παραπάνω από ένα Τμήματα.
-
+--7. Απόφοιτοι που εγγράφηκαν ταυτόχρονα σε παραπάνω από ένα Τμήματα.
 DELIMITER $$
 CREATE PROCEDURE FindConcurrentEnrollments()
 BEGIN
@@ -187,8 +177,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- GenerateUniversityProgramReport
-
+--8. GenerateUniversityProgramReport
 DELIMITER $$
 CREATE PROCEDURE `GenerateUniversityProgramReport`(
     IN `university_name` VARCHAR(255),
@@ -212,6 +201,22 @@ BEGIN
         AND pt.end_date <= end_date
     GROUP BY
         p.subject_type;
+    SELECT
+        p.program_name,
+        COUNT(DISTINCT pt.program_term_id) AS number_of_program_terms,
+        COUNT(e.enrollment_id) AS registrations
+    FROM
+        University u
+        JOIN Faculty f ON u.university_id = f.university_id
+        JOIN Program p ON f.faculty_id = p.faculty_id
+        JOIN Program_Term pt ON p.program_id = pt.program_id
+        LEFT JOIN Enrollment e ON pt.program_term_id = e.program_term_id
+    WHERE
+        u.university_name = university_name
+        AND pt.start_date >= start_date
+        AND pt.end_date <= end_date
+    GROUP BY
+        p.program_name;
 END$$
 DELIMITER ;
 

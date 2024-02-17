@@ -90,13 +90,25 @@ CREATE TRIGGER IncrementEmployeeCountAfterWorkExperienceAdded
 AFTER INSERT ON WorkExperience
 FOR EACH ROW
 BEGIN
-    -- Increment the employee count for the company associated with the new work experience record
-    UPDATE Company
-    SET employees = employees + 1
-    WHERE company_id = NEW.company_id;
+    DECLARE jobType VARCHAR(255);
+    
+    -- Fetch the job type for the new work experience record
+    SELECT jt.job_type INTO jobType
+    FROM WorkExperience we
+    JOIN JobTitle jt ON we.job_title_id = jt.title_id
+    WHERE we.experience_id = NEW.experience_id;
+    
+    -- Check if the job type is "Permanent" before incrementing the employee count
+    IF jobType = 'Permanent' THEN
+        -- Increment the employee count for the company associated with the new work experience record
+        UPDATE Company
+        SET employees = employees + 1
+        WHERE company_id = NEW.company_id;
+    END IF;
 END$$
 
 DELIMITER ;
+
 
 -- to test 
 

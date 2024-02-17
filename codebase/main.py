@@ -1,6 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
-from db_operations import generate_and_insert_locations, create_database_and_tables, generate_and_insert_students, generate_and_insert_universities, generate_and_insert_faculties, generate_and_insert_educationLevel, generate_and_insert_degree, generate_and_insert_Program, generate_and_insert_Programterm, generate_and_insert_modules, generate_and_insert_enrollments, generate_and_insert_companies, generate_and_insert_job_titles, generate_and_insert_graduations, generate_and_insert_work_experiences, generate_and_insert_student_module_participation, create_stored_procedures
+from codebase.db_operations import generate_and_insert_locations, create_database_and_tables, generate_and_insert_students, generate_and_insert_universities, generate_and_insert_faculties, generate_and_insert_educationLevel, generate_and_insert_degree, generate_and_insert_Program, generate_and_insert_Programterm, generate_and_insert_modules, generate_and_insert_enrollments, generate_and_insert_companies, generate_and_insert_job_titles, generate_and_insert_graduations, generate_and_insert_work_experiences, generate_and_insert_student_module_participation, create_stored_procedures, create_triggers, create_views_roles
 
 
 def create_database(connection, database_name):
@@ -60,11 +60,14 @@ if connection is not None:
     # execute_sql_file(connection, 'codebase/test_s_proc.sql')
 
     #create indexes
-    # create triggers
-    # create stored procedures 
+    # create views_and_others
     
     create_stored_procedures(connection)
     
+    create_triggers(connection)
+
+    create_views_roles(connection)
+
     num_locations = 12000  
     generate_and_insert_locations(connection, num_locations)
 
